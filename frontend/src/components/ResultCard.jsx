@@ -31,10 +31,19 @@ const ResultCard = ({ data }) => {
       {tab === 'general' && (
         <div>
           <p><strong>Phone:</strong> {data.phone_number}</p>
-          <p><strong>Valid:</strong> {data.valid ? 'Yes' : 'No'}</p>
-          <p><strong>Name:</strong> {data.name || 'N/A'}</p>
+          <p>
+            <strong>Valid:</strong>
+            {data.valid ? (
+              <span className="ml-1 px-2 py-0.5 text-xs bg-green-500 text-white rounded" title="Valid number">Yes</span>
+            ) : (
+              <span className="ml-1 px-2 py-0.5 text-xs bg-red-500 text-white rounded" title="Invalid number">No</span>
+            )}
+          </p>
+          <p title="Location or owner name if available">
+            <strong>Name:</strong> {data.name || 'N/A'}
+          </p>
           <p><strong>Country:</strong> {data.country}</p>
-          <p><strong>Carrier:</strong> {data.carrier}</p>
+          <p><strong>Carrier:</strong> {data.carrier || 'N/A'}</p>
           {data.line_type && (
             <p><strong>Line Type:</strong> {data.line_type}</p>
           )}
@@ -46,7 +55,17 @@ const ResultCard = ({ data }) => {
           {data.accounts && data.accounts.length > 0 ? (
             <ul className="list-disc list-inside">
               {data.accounts.map((acc, i) => (
-                <li key={i}>{platformIcon(acc)}{acc}</li>
+                <li key={i}>
+                  <a
+                    href={acc}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:underline"
+                    title={acc}
+                  >
+                    {platformIcon(acc)}{acc}
+                  </a>
+                </li>
               ))}
             </ul>
           ) : (

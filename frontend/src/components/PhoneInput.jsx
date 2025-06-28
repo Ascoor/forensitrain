@@ -16,7 +16,7 @@ const PhoneInput = ({ onSearch }) => {
         type="text"
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
-        placeholder="Enter phone number"
+        placeholder="e.g. +12024561111"
         className="border p-2 flex-1"
       />
       <button type="submit" className="bg-blue-500 text-white px-4 py-2">
