@@ -29,7 +29,7 @@ actual user interface runs at `http://localhost:5173` when launched via
    ```bash
    pip install -r requirements.txt
    ```
-3. Copy `.env.example` to `.env` and add your API keys.
+3. Edit `backend/.env` and add your API keys.
 4. Start the API:
    ```bash
    uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
@@ -76,7 +76,7 @@ dependencies, and launches the API and React frontend concurrently.
 
 ## Docker Deployment
 
-1. Create a `.env` file in `backend/` with your API keys (see `.env.example`).
+1. Edit the provided `backend/.env` file with your API keys.
 2. Build and start the stack:
    ```bash
    docker-compose up --build
