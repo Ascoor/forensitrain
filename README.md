@@ -1,87 +1,88 @@
-# ForensiTrain
+# 📘 مقدمة
 
-ForensiTrain is a simple OSINT utility that performs live lookups on phone
-numbers. It uses public APIs and command line tools such as Maigret to collect
-metadata about a target number. Results include country, carrier information,
-potential social media profiles and known breach exposure.
+**ForensiTrain** هي أداة ويب مفتوحة المصدر تهدف إلى تحليل أرقام الهواتف باستخدام تقنيات OSINT. تجمع الأداة بيانات عامة من عدة مصادر وتعرضها للمستخدم عبر واجهة تفاعلية مبنية بـReact وFastAPI. تناسب الباحثين والمحققين والطلبة وكل من يهتم بتحليل الأرقام.
 
-This project is provided **for educational and lawful OSINT use only**. Ensure
-you comply with local laws and API terms of service before running queries.
+## 🚀 المميزات
 
-For a history of changes, see [CHANGELOG.md](CHANGELOG.md).
+- **تحليل رقم الهاتف** باستخدام مكتبة `phonenumbers`.
+- **ربط الحسابات الاجتماعية** عبر أداة [Maigret](https://github.com/soxoj/maigret).
+- **فحص التسريبات الأمنية** بواسطة واجهة [HaveIBeenPwned](https://haveibeenpwned.com/).
+- **تسجيل استعلامات المستخدم** في مجلد `logs/`.
+- **واجهة تفاعلية** مبنية بـReact وTailwindCSS.
+- **إمكانية التشغيل بدون Docker** عبر سكربت `forensitrain_start.sh`.
 
-## Local Development (No Docker)
+## ⚙️ المتطلبات البرمجية
 
-### Backend
+- Python 3.10 أو أحدث.
+- Node.js 18 أو أحدث.
+- الحزم الموجودة في `backend/requirements.txt` و`frontend/package.json`.
+- تثبيت أداة Maigret بشكل مستقل.
+- إعداد ملفات `.env` للواجهة والخلفية.
 
-1. Create a Python virtual environment and activate it:
-   ```bash
-   cd backend
-   python -m venv venv
-   source venv/bin/activate  # on Windows use venv\Scripts\activate
-   ```
-2. Install dependencies:
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Copy `.env.example` to `.env` and add your API keys.
-4. Start the API:
-   ```bash
-   uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-   ```
-5. (Optional) Install Maigret globally for social profile lookups:
-   ```bash
-   pip install maigret
-   ```
+## 🛠️ خطوات التشغيل المحلية
 
-### Frontend
+```bash
+# 1. تشغيل الخادم الخلفي
+cd backend
+python -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+cp .env.example .env  # أضف مفاتيحك هنا
+uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+```
 
-1. In a new terminal run:
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
+```bash
+# 2. تشغيل الواجهة الأمامية
+cd frontend
+npm install
+cp .env.example .env  # عدل VITE_API_BASE إذا لزم
+npm run dev
+```
 
-The React app will load at http://localhost:5173. By default it queries the API
-at `http://localhost:8000/api`. You can override this by creating a `.env`
-file in `frontend/` containing `VITE_API_BASE=http://yourhost:8000/api`.
-
-All phone lookups are logged to `logs/queries.log`.
-
-### Unified Startup Script
-
-To automatically set up both services without Docker run:
+أو ببساطة استخدم السكربت الموحد:
 
 ```bash
 ./forensitrain_start.sh
 ```
 
-The script creates the backend virtual environment if needed, installs
-dependencies, and launches the API and React frontend concurrently.
+## 🧪 دليل الاختبار اليدوي
 
-### Manual Testing
+1. بعد تشغيل الخدمتين افتح المتصفح على `http://localhost:5173`.
+2. جرّب رقمًا مثل `+12024561111` وتأكد من ظهور بيانات الدولة والناقل والحسابات المرتبطة والتسريبات.
+3. في حال إدخال رقم غير صالح ستظهر رسالة خطأ.
+4. يتم تخزين كل استعلام في `logs/queries.log` ويمكن مراجعتها لاحقًا.
 
-1. Run `./forensitrain_start.sh` and wait for both servers to start.
-2. Open `http://localhost:5173` in your browser.
-3. Enter a valid phone number such as `+12024561111` and submit.
-4. Confirm general info, social accounts, and breach history populate.
-5. Check `logs/queries.log` for a new entry.
-6. Try an invalid number to verify an error message is shown.
+## 📁 ملفات التكوين والمفاتيح
 
-## Docker Deployment
+```bash
+# backend/.env
+HIBP_API_KEY=your_hibp_key
+NUMVERIFY_API_KEY=your_numverify_key
 
-1. Create a `.env` file in `backend/` with your API keys (see `.env.example`).
-2. Build and start the stack:
-   ```bash
-   docker-compose up --build
-   ```
-   The backend will run on port `8000` and the frontend on ports `80`/`443`.
-3. (Optional) Acquire TLS certificates using Let's Encrypt:
-   ```bash
-   ./deploy/certbot.sh yourdomain.com
-   ```
-   Certificates are stored in `./certbot/conf` and mounted into the Nginx container.
+# frontend/.env
+VITE_API_BASE=http://localhost:8000/api
+```
 
-The frontend is served via Nginx which also proxies `/api/` requests to the FastAPI backend running with Gunicorn.
+كل متغير بيئي خاص بمصدر بيانات خارجي، ولا يجب مشاركة هذه المفاتيح علنًا.
+
+## 🗃️ هيكل المجلدات الأساسية
+
+```text
+forensitrain/
+├── backend/       # كود FastAPI والخدمات
+├── frontend/      # تطبيق React
+├── deploy/        # سكربتات النشر وشهادة TLS
+├── logs/          # سجلات الاستعلامات
+└── forensitrain_start.sh
+```
+
+## 🛡️ الملاحظات الأمنية والأخلاقية
+
+هذه الأداة مخصصة للأغراض القانونية والتعليمية فقط. يتحمل المستخدم كامل المسؤولية عند تشغيلها، ويجب الالتزام بالقوانين المحلية وشروط استخدام واجهات البرمجة. يُحظر مشاركة ملفات `.env` أو مفاتيح الوصول مع أي طرف آخر.
+
+## 📌 معلومات إضافية
+
+- للمساهمة في المشروع يرجى فتح طلب دمج (Pull Request) بعد مراجعة الكود.
+- يتم إصدار النسخ النهائية عبر وضع علامة (git tag) للإصدار داخل `CHANGELOG.md`.
+- لمزيد من المعلومات حول Maigret راجع [مستودع المشروع](https://github.com/soxoj/maigret) وللتعرف على مكتبة `phonenumbers` اطلع على [التوثيق الرسمي](https://github.com/daviddrysdale/python-phonenumbers).
 
