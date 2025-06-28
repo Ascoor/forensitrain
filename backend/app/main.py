@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from slowapi.errors import RateLimitExceeded
@@ -20,6 +21,21 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+@app.get("/", include_in_schema=False)
+def index() -> HTMLResponse:
+    """Simple landing page explaining how to access the frontend."""
+    html = (
+        "<html><body>"
+        "<h1>ForensiTrain API</h1>"
+        "<p>The React frontend runs separately on port 5173. "
+        "Start it with <code>npm run dev</code> and open "
+        "<a href='http://localhost:5173'>http://localhost:5173</a>." 
+        "</p>"
+        "</body></html>"
+    )
+    return HTMLResponse(content=html)
 
 @app.get("/api/health")
 def health_check():

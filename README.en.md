@@ -10,6 +10,11 @@ you comply with local laws and API terms of service before running queries.
 
 For a history of changes, see [CHANGELOG.md](CHANGELOG.md).
 
+When running the FastAPI server directly, visiting `http://localhost:8000/` now
+shows a short landing page that explains how to start the React frontend. The
+actual user interface runs at `http://localhost:5173` when launched via
+`npm run dev`.
+
 ## Local Development (No Docker)
 
 ### Backend
