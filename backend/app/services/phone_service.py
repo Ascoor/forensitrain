@@ -2,7 +2,9 @@ import json
 import os
 import subprocess
 from datetime import datetime
-from typing import List, Dict
+from typing import List, Dict, Optional
+
+import logging
 
 from dotenv import load_dotenv
 
@@ -23,6 +25,13 @@ CACHE: Dict[str, dict] = {}
 LOG_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../logs"))
 os.makedirs(LOG_DIR, exist_ok=True)
 LOG_PATH = os.path.join(LOG_DIR, "queries.log")
+
+# basic logging setup
+logging.basicConfig(
+    filename=LOG_PATH,
+    level=logging.INFO,
+    format="%(asctime)s\t%(levelname)s\t%(message)s",
+)
 
 
 def _query_numverify(number: str) -> Dict:
@@ -75,9 +84,11 @@ def _query_hibp(number: str) -> List[str]:
         pass
     return []
 
-def _log_query(phone: str, status: str) -> None:
-    with open(LOG_PATH, "a") as f:
-        f.write(f"{datetime.utcnow().isoformat()}\t{phone}\t{status}\n")
+def _log_query(phone: str, status: str, error: Optional[str] = None) -> None:
+    if error:
+        logging.error("%s\t%s", phone, error)
+    else:
+        logging.info("%s\t%s", phone, status)
 
 
 def analyze_phone(phone_number: str) -> dict:
@@ -107,17 +118,27 @@ def analyze_phone(phone_number: str) -> dict:
             "errors": "Invalid phone number",
             "timestamp": datetime.utcnow().isoformat() + "Z",
         }
-        _log_query(phone_number, resp["status"])
+        _log_query(phone_number, resp["status"], resp["errors"])
         return resp
 
-    meta = _query_numverify(phone_number)
-    if meta:
-        result["carrier"] = meta.get("carrier") or result["carrier"]
-        result["line_type"] = meta.get("line_type")
-        result["name"] = meta.get("location")
+    try:
+        meta = _query_numverify(phone_number)
+        if meta:
+            result["carrier"] = meta.get("carrier") or result["carrier"]
+            result["line_type"] = meta.get("line_type")
+            result["name"] = meta.get("location")
 
-    result["accounts"] = _query_maigret(phone_number)
-    result["breaches"] = _query_hibp(phone_number)
+        result["accounts"] = _query_maigret(phone_number)
+        result["breaches"] = _query_hibp(phone_number)
+    except Exception as exc:
+        resp = {
+            "status": "error",
+            "data": None,
+            "errors": "Lookup failed",
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+        }
+        _log_query(phone_number, resp["status"], str(exc))
+        return resp
 
     resp = {
         "status": "success",

@@ -41,8 +41,9 @@ you comply with local laws and API terms of service before running queries.
    npm run dev
    ```
 
-The React app will load at http://localhost:5173 and will query the API at
-`http://localhost:8000/api`.
+The React app will load at http://localhost:5173. By default it queries the API
+at `http://localhost:8000/api`. You can override this by creating a `.env`
+file in `frontend/` containing `VITE_API_BASE=http://yourhost:8000/api`.
 
 All phone lookups are logged to `logs/queries.log`.
 
@@ -56,6 +57,15 @@ To automatically set up both services without Docker run:
 
 The script creates the backend virtual environment if needed, installs
 dependencies, and launches the API and React frontend concurrently.
+
+### Manual Testing
+
+1. Run `./forensitrain_start.sh` and wait for both servers to start.
+2. Open `http://localhost:5173` in your browser.
+3. Enter a valid phone number such as `+12024561111` and submit.
+4. Confirm general info, social accounts, and breach history populate.
+5. Check `logs/queries.log` for a new entry.
+6. Try an invalid number to verify an error message is shown.
 
 ## Docker Deployment
 

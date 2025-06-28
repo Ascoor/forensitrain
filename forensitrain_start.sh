@@ -17,6 +17,9 @@ if [ ! -d "venv" ]; then
 fi
 # shellcheck disable=SC1091
 source venv/bin/activate
+if [ -f .env ]; then
+    export $(grep -v '^#' .env | xargs) || true
+fi
 pip install -r requirements.txt
 mkdir -p "$SCRIPT_DIR/logs"
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload &
