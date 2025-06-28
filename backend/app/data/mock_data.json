@@ -1,0 +1,18 @@
+[
+  {
+    "phone_number": "+15555550123",
+    "name": "Alice Example",
+    "country": "United States",
+    "email": "alice@example.com",
+    "accounts": ["twitter:alice123", "facebook:alice"],
+    "connections": ["+15555550999"]
+  },
+  {
+    "phone_number": "+447911123456",
+    "name": "Bob Sample",
+    "country": "United Kingdom",
+    "email": "bob@sample.co.uk",
+    "accounts": ["linkedin:bob", "github:bob"],
+    "connections": ["+15555550123"]
+  }
+]
