@@ -8,6 +8,8 @@ potential social media profiles and known breach exposure.
 This project is provided **for educational and lawful OSINT use only**. Ensure
 you comply with local laws and API terms of service before running queries.
 
+For a history of changes, see [CHANGELOG.md](CHANGELOG.md).
+
 ## Local Development (No Docker)
 
 ### Backend
