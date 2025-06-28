@@ -26,7 +26,7 @@ function App() {
       <PhoneInput onSearch={handleSearch} />
       {loading && <p className="mb-2">Loading...</p>}
       {result && <ResultCard data={result} />}
-      <p className="text-xs text-gray-600 mt-4">For educational and lawful OSINT use only.</p>
+      <p className="text-xs text-gray-600 mt-4">This tool is for lawful OSINT use only. The creators are not responsible for misuse.</p>
     </div>
   )
 }

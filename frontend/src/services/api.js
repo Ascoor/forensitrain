@@ -7,5 +7,9 @@ export const analyzePhone = async (phoneNumber) => {
   if (!res.ok) {
     throw new Error('Request failed')
   }
-  return res.json()
+  const data = await res.json()
+  if (data.status !== 'success') {
+    throw new Error(data.errors || 'Request failed')
+  }
+  return data.data
 }

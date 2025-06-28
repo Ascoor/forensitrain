@@ -1,9 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
+from slowapi.errors import RateLimitExceeded
 
-from .routes.phone import router as phone_router
+from .routes.phone import router as phone_router, limiter, rate_limit_handler
+
+load_dotenv()
 
 app = FastAPI(title="ForensiTrain API")
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
 
 # Allow frontend development origins
 app.add_middleware(
