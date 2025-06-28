@@ -336,3 +336,77 @@ async def multi_source_lookup(phone_number: str) -> dict:
     CACHE[phone_number] = resp
     _log_query(phone_number, resp["status"])
     return resp
+
+
+def _calculate_confidence(data: Dict) -> float:
+    """Simple heuristic to assign a confidence score."""
+    score = 0.0
+    if data.get("valid"):
+        score += 0.2
+    if data.get("carrier"):
+        score += 0.2
+    if data.get("accounts"):
+        score += 0.2
+    if data.get("breaches"):
+        score += 0.2
+    if data.get("connections"):
+        score += 0.2
+    return round(min(score, 1.0), 2)
+
+
+def enrich_phone_data(phone_number: str) -> dict:
+    """Run lookups and return a unified enrichment structure."""
+    result = asyncio.run(multi_source_lookup(phone_number))
+    if result.get("status") != "success" or not result.get("data"):
+        return result
+
+    data = result["data"]
+    unified = {
+        "phone": data.get("phone_number"),
+        "valid": data.get("valid"),
+        "country": data.get("country"),
+        "carrier": data.get("carrier"),
+        "line_type": data.get("line_type"),
+        "name": data.get("name"),
+        "social_profiles": data.get("accounts", []),
+        "breaches": data.get("breaches", []),
+        "connections": data.get("connections", []),
+        "confidence_score": _calculate_confidence(data),
+        "sources": data.get("sources_used", []),
+    }
+
+    return {
+        "status": result["status"],
+        "data": unified,
+        "errors": result.get("errors"),
+        "timestamp": result.get("timestamp"),
+    }
+
+
+async def a_enrich_phone_data(phone_number: str) -> dict:
+    """Async wrapper around :func:`enrich_phone_data`."""
+    result = await multi_source_lookup(phone_number)
+    if result.get("status") != "success" or not result.get("data"):
+        return result
+
+    data = result["data"]
+    unified = {
+        "phone": data.get("phone_number"),
+        "valid": data.get("valid"),
+        "country": data.get("country"),
+        "carrier": data.get("carrier"),
+        "line_type": data.get("line_type"),
+        "name": data.get("name"),
+        "social_profiles": data.get("accounts", []),
+        "breaches": data.get("breaches", []),
+        "connections": data.get("connections", []),
+        "confidence_score": _calculate_confidence(data),
+        "sources": data.get("sources_used", []),
+    }
+
+    return {
+        "status": result["status"],
+        "data": unified,
+        "errors": result.get("errors"),
+        "timestamp": result.get("timestamp"),
+    }

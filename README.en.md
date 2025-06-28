@@ -5,6 +5,14 @@ numbers. It uses public APIs and command line tools such as Maigret to collect
 metadata about a target number. Results include country, carrier information,
 potential social media profiles and known breach exposure.
 
+## Key Features
+
+- Phone number parsing with `phonenumbers`
+- Carrier and line type lookup via NumVerify
+- Social profile discovery using Maigret
+- Breach checks through HaveIBeenPwned
+- Unified enrichment endpoint returning a confidence score
+
 This project is provided **for educational and lawful OSINT use only**. Ensure
 you comply with local laws and API terms of service before running queries.
 
@@ -71,6 +79,8 @@ dependencies, and launches the API and React frontend concurrently.
 2. Open `http://localhost:5173` in your browser.
 3. Enter a valid phone number such as `+12024561111` and submit.
 4. Confirm general info, social accounts, and breach history populate.
+   You can also POST to `/api/phone/enrich` for a merged response with a
+   confidence score.
 5. Check `logs/queries.log` for a new entry.
 6. Try an invalid number to verify an error message is shown.
 
