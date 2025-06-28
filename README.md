@@ -1,85 +1,75 @@
 # ForensiTrain
 
-ForensiTrain is a simple OSINT utility that performs live lookups on phone
-numbers. It uses public APIs and command line tools such as Maigret to collect
-metadata about a target number. Results include country, carrier information,
-potential social media profiles and known breach exposure.
+## \U0001F4D8 نبذة عن المشروع
+**ForensiTrain** هي أداة ويب مفتوحة المصدر تهدف إلى تحليل أرقام الهواتف باستخدام تقنيات OSINT (الاستخبارات مفتوحة المصدر).
+تساعد الأداة الباحثين والمحترفين في الأمن الرقمي على جمع معلومات سريعة حول رقم هاتف مثل الدولة وشركة الاتصالات والحسابات الاجتماعية المرتبطة به.
 
-This project is provided **for educational and lawful OSINT use only**. Ensure
-you comply with local laws and API terms of service before running queries.
+## \U0001F527 الوظائف الأساسية
+- **تحليل الرقم**: تحديد الدولة، شركة الاتصالات، وصلاحية تنسيق الرقم.
+- **اكتشاف الحسابات الاجتماعية** عبر أداة Maigret للوصول إلى روابط الحسابات المحتملة.
+- **فحص التسريبات الأمنية** بالاعتماد على واجهة HaveIBeenPwned عند توفير المفتاح المناسب.
+- **تسجيل السجلات** لجميع الاستعلامات في ملف `logs/queries.log`.
+- **واجهة تفاعلية** مبنية ب React وVite.
+- **بيئة تشغيل محلية** بدون الحاجة إلى Docker.
 
-## Local Development (No Docker)
+## \u2699\ufe0f متطلبات التشغيل
+- Python 3.10 أو أحدث
+- Node.js 18 أو أحدث
+- تثبيت أداة Maigret (باستخدام `pip install maigret`)
+- إنشاء ملف `.env` في كل من `backend/` و `frontend/` انطلاقاً من ملفات \*.env.example.
 
-### Backend
-
-1. Create a Python virtual environment and activate it:
+## \U0001F680 طريقة التشغيل (محلياً)
+### تشغيل الخادم الخلفي (FastAPI)
+1. الانتقال إلى مجلد `backend` وإنشاء بيئة افتراضية:
    ```bash
    cd backend
    python -m venv venv
-   source venv/bin/activate  # on Windows use venv\Scripts\activate
+   source venv/bin/activate
    ```
-2. Install dependencies:
+2. تثبيت المتطلبات:
    ```bash
    pip install -r requirements.txt
    ```
-3. Copy `.env.example` to `.env` and add your API keys.
-4. Start the API:
+3. نسخ `.env.example` إلى `.env` وإضافة المفاتيح اللازمة (`HIBP_API_KEY` و`NUMVERIFY_API_KEY`).
+4. تشغيل الخادم:
    ```bash
    uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
    ```
-5. (Optional) Install Maigret globally for social profile lookups:
-   ```bash
-   pip install maigret
-   ```
 
-### Frontend
-
-1. In a new terminal run:
+### تشغيل الواجهة الأمامية (React + Vite)
+1. في نافذة طرفية جديدة:
    ```bash
    cd frontend
    npm install
    npm run dev
    ```
+2. يمكن تخصيص عنوان الـ API بإنشاء ملف `.env` داخل `frontend/` يحتوي المتغير `VITE_API_BASE`.
 
-The React app will load at http://localhost:5173. By default it queries the API
-at `http://localhost:8000/api`. You can override this by creating a `.env`
-file in `frontend/` containing `VITE_API_BASE=http://yourhost:8000/api`.
-
-All phone lookups are logged to `logs/queries.log`.
-
-### Unified Startup Script
-
-To automatically set up both services without Docker run:
-
+### تشغيل السكربت الموحد
+لتشغيل الواجهة والخلفية معاً قم بتشغيل:
 ```bash
 ./forensitrain_start.sh
 ```
+يقوم السكربت بإنشاء البيئة الافتراضية وتثبيت الحزم ثم تشغيل الخوادم بشكل متزامن.
 
-The script creates the backend virtual environment if needed, installs
-dependencies, and launches the API and React frontend concurrently.
+## \U0001F4C1 ملفات التكوين
+- يعتمد الخادم الخلفي على متغيرات مثل:
+  - `HIBP_API_KEY`: مفتاح خدمة HaveIBeenPwned.
+  - `NUMVERIFY_API_KEY`: مفتاح خدمة Numverify.
+- في الواجهة الأمامية يوجد المتغير `VITE_API_BASE` لتحديد عنوان الـ API.
 
-### Manual Testing
+## \U0001F9EA خطوات اختبار يدوية
+1. بعد تشغيل `forensitrain_start.sh` افتح المتصفح على `http://localhost:5173`.
+2. جرب رقماً مثل `+12024561111` وتأكد من ظهور البيانات والروابط.
+3. راقب ملف `logs/queries.log` للتأكد من تسجيل الاستعلام.
 
-1. Run `./forensitrain_start.sh` and wait for both servers to start.
-2. Open `http://localhost:5173` in your browser.
-3. Enter a valid phone number such as `+12024561111` and submit.
-4. Confirm general info, social accounts, and breach history populate.
-5. Check `logs/queries.log` for a new entry.
-6. Try an invalid number to verify an error message is shown.
+## \U0001F4DD ملفات السجل والمهام
+- كل استعلام يُسجل في `logs/queries.log` مع التاريخ والحالة.
+- يتم حفظ مخرجات Maigret مؤقتاً في `logs/maigret_<number>.json` قبل معالجتها وحذفها.
+- أي بيانات إضافية تُخزن داخل مجلد `logs/` عند تشغيل الأداة.
 
-## Docker Deployment
-
-1. Create a `.env` file in `backend/` with your API keys (see `.env.example`).
-2. Build and start the stack:
-   ```bash
-   docker-compose up --build
-   ```
-   The backend will run on port `8000` and the frontend on ports `80`/`443`.
-3. (Optional) Acquire TLS certificates using Let's Encrypt:
-   ```bash
-   ./deploy/certbot.sh yourdomain.com
-   ```
-   Certificates are stored in `./certbot/conf` and mounted into the Nginx container.
-
-The frontend is served via Nginx which also proxies `/api/` requests to the FastAPI backend running with Gunicorn.
+## \u26a0\ufe0f ملاحظات أمنية وأخلاقية
+- الأداة مخصصة للاستخدام القانوني فقط ولا يجب إساءة توظيفها.
+- تذكر أن البيانات المستخلصة من مصادر عامة ويجب احترام خصوصية الآخرين.
+- احرص على حماية المفاتيح المخزنة في ملفات `.env` وعدم مشاركتها علناً.
 
