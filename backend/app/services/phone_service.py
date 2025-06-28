@@ -43,18 +43,19 @@ def _query_numverify(number: str) -> Dict:
 
 def _query_maigret(number: str) -> List[str]:
     """Run Maigret CLI to find social profiles for the phone number."""
-    profiles = []
-    cmd = ["maigret", number, "--json"]
+    profiles: List[str] = []
+    output_path = os.path.join(LOG_DIR, f"maigret_{number}.json")
+    cmd = ["maigret", number, "--json", "--top-sites", "-o", output_path]
     try:
-        result = subprocess.run(
-            cmd, capture_output=True, text=True, timeout=60, check=False
-        )
-        if result.returncode == 0 and result.stdout:
-            data = json.loads(result.stdout)
+        subprocess.run(cmd, capture_output=True, text=True, timeout=60, check=False)
+        if os.path.exists(output_path):
+            with open(output_path) as f:
+                data = json.load(f)
             for site in data.get("sites", []):
                 url = site.get("url")
                 if url:
                     profiles.append(url)
+            os.remove(output_path)
     except Exception:
         pass
     return profiles

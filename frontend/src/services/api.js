@@ -1,5 +1,7 @@
+const API_BASE = 'http://localhost:8000/api'
+
 export const analyzePhone = async (phoneNumber) => {
-  const res = await fetch('http://localhost:8000/api/phone/analyze', {
+  const res = await fetch(`${API_BASE}/phone/analyze`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ phone_number: phoneNumber })
