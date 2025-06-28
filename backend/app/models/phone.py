@@ -8,8 +8,10 @@ class PhoneRequest(BaseModel):
 
 class PhoneResponse(BaseModel):
     phone_number: str
-    name: str
+    valid: bool
     country: str
-    email: Optional[str] = None
+    carrier: Optional[str] = None
+    line_type: Optional[str] = None
+    name: Optional[str] = None
     accounts: List[str] = []
-    connections: List[str] = []
+    breaches: List[str] = []
