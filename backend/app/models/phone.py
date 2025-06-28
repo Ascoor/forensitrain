@@ -6,7 +6,7 @@ class PhoneRequest(BaseModel):
     phone_number: str
 
 
-class PhoneResponse(BaseModel):
+class PhoneData(BaseModel):
     phone_number: str
     valid: bool
     country: str
@@ -15,3 +15,10 @@ class PhoneResponse(BaseModel):
     name: Optional[str] = None
     accounts: List[str] = []
     breaches: List[str] = []
+
+
+class StandardResponse(BaseModel):
+    status: str
+    data: Optional[PhoneData] = None
+    errors: Optional[str] = None
+    timestamp: str

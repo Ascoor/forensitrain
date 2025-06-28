@@ -1,15 +1,28 @@
 import json
 import os
 import subprocess
+from datetime import datetime
 from typing import List, Dict
+
+from dotenv import load_dotenv
 
 import phonenumbers
 from phonenumbers import carrier, geocoder
 import requests
 
+load_dotenv()
+
 
 HIBP_API_KEY = os.getenv("HIBP_API_KEY")
 NUMVERIFY_API_KEY = os.getenv("NUMVERIFY_API_KEY")
+
+# simple in-memory cache {phone_number: response_dict}
+CACHE: Dict[str, dict] = {}
+
+# ensure logs directory exists
+LOG_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../logs"))
+os.makedirs(LOG_DIR, exist_ok=True)
+LOG_PATH = os.path.join(LOG_DIR, "queries.log")
 
 
 def _query_numverify(number: str) -> Dict:
@@ -61,9 +74,16 @@ def _query_hibp(number: str) -> List[str]:
         pass
     return []
 
+def _log_query(phone: str, status: str) -> None:
+    with open(LOG_PATH, "a") as f:
+        f.write(f"{datetime.utcnow().isoformat()}\t{phone}\t{status}\n")
+
 
 def analyze_phone(phone_number: str) -> dict:
     """Return OSINT intelligence for the given phone number."""
+    if phone_number in CACHE:
+        return CACHE[phone_number]
+
     result: Dict = {
         "phone_number": phone_number,
         "valid": False,
@@ -80,7 +100,14 @@ def analyze_phone(phone_number: str) -> dict:
         result["country"] = geocoder.description_for_number(parsed, "en")
         result["carrier"] = carrier.name_for_number(parsed, "en")
     except phonenumbers.NumberParseException:
-        return result
+        resp = {
+            "status": "error",
+            "data": None,
+            "errors": "Invalid phone number",
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+        }
+        _log_query(phone_number, resp["status"])
+        return resp
 
     meta = _query_numverify(phone_number)
     if meta:
@@ -91,4 +118,13 @@ def analyze_phone(phone_number: str) -> dict:
     result["accounts"] = _query_maigret(phone_number)
     result["breaches"] = _query_hibp(phone_number)
 
-    return result
+    resp = {
+        "status": "success",
+        "data": result,
+        "errors": None,
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+    }
+
+    CACHE[phone_number] = resp
+    _log_query(phone_number, resp["status"])
+    return resp
