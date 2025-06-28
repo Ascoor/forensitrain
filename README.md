@@ -27,7 +27,7 @@ cd backend
 python -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env  # أضف مفاتيحك هنا
+# عدل ملف backend/.env وأضف مفاتيحك هنا
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
@@ -35,7 +35,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 # 2. تشغيل الواجهة الأمامية
 cd frontend
 npm install
-cp .env.example .env  # عدل VITE_API_BASE إذا لزم
+# عدل ملف frontend/.env إذا لزم
 npm run dev
 ```
 
@@ -55,7 +55,7 @@ npm run dev
 ## 📁 ملفات التكوين والمفاتيح
 
 ```bash
-# backend/.env
+# backend/.env (موجود بالفعل، عدله بالقيم الصحيحة)
 HIBP_API_KEY=your_hibp_key
 NUMVERIFY_API_KEY=your_numverify_key
 
