@@ -6,7 +6,7 @@ from fastapi.responses import JSONResponse
 from datetime import datetime
 
 from ..models.phone import PhoneRequest, StandardResponse
-from ..services.phone_service import analyze_phone
+from ..services.phone_service import multi_source_lookup
 
 limiter = Limiter(key_func=get_remote_address)
 router = APIRouter()
@@ -26,6 +26,6 @@ def rate_limit_handler(request: Request, exc):
 
 @router.post('/analyze', response_model=StandardResponse)
 @limiter.limit("30/minute")
-def analyze(request: Request, payload: PhoneRequest):
-    result = analyze_phone(payload.phone_number)
+async def analyze(request: Request, payload: PhoneRequest):
+    result = await multi_source_lookup(payload.phone_number)
     return result

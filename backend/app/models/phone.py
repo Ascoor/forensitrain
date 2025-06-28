@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Optional, Dict
 from pydantic import BaseModel
 
 
@@ -17,10 +17,11 @@ class PhoneData(BaseModel):
     breaches: List[str] = []
     connections: List[dict] = []
     graph: Optional[dict] = None
+    sources_used: List[str] = []
 
 
 class StandardResponse(BaseModel):
     status: str
     data: Optional[PhoneData] = None
-    errors: Optional[str] = None
+    errors: Optional[Dict[str, Optional[str]]] = None
     timestamp: str
