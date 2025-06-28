@@ -15,6 +15,8 @@ class PhoneData(BaseModel):
     name: Optional[str] = None
     accounts: List[str] = []
     breaches: List[str] = []
+    connections: List[dict] = []
+    graph: Optional[dict] = None
 
 
 class StandardResponse(BaseModel):

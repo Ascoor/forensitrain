@@ -25,6 +25,8 @@ CACHE: Dict[str, dict] = {}
 LOG_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../logs"))
 os.makedirs(LOG_DIR, exist_ok=True)
 LOG_PATH = os.path.join(LOG_DIR, "queries.log")
+# relationships log
+REL_LOG_PATH = os.path.join(LOG_DIR, "relationships.log")
 
 # basic logging setup
 logging.basicConfig(
@@ -33,14 +35,18 @@ logging.basicConfig(
     format="%(asctime)s\t%(levelname)s\t%(message)s",
 )
 
+# separate logger for relationship mapping
+rel_logger = logging.getLogger("relationships")
+rel_handler = logging.FileHandler(REL_LOG_PATH)
+rel_logger.addHandler(rel_handler)
+rel_logger.setLevel(logging.INFO)
+
 
 def _query_numverify(number: str) -> Dict:
     """Query numverify API for enriched phone metadata."""
     if not NUMVERIFY_API_KEY:
         return {}
-    url = (
-        f"http://apilayer.net/api/validate?access_key={NUMVERIFY_API_KEY}&number={number}"
-    )
+    url = f"http://apilayer.net/api/validate?access_key={NUMVERIFY_API_KEY}&number={number}"
     try:
         resp = requests.get(url, timeout=10)
         if resp.status_code == 200:
@@ -84,11 +90,69 @@ def _query_hibp(number: str) -> List[str]:
         pass
     return []
 
+
 def _log_query(phone: str, status: str, error: Optional[str] = None) -> None:
     if error:
         logging.error("%s\t%s", phone, error)
     else:
         logging.info("%s\t%s", phone, status)
+
+
+def build_relationship_map(
+    number: str, accounts: List[str], breaches: List[str]
+) -> (List[Dict], Dict):
+    """Create relationship mapping for a phone number based on mock data."""
+    relationships: List[Dict] = []
+    nodes: List[Dict] = [{"id": number, "label": number}]
+    edges: List[Dict] = []
+
+    data_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../data/mock_data.json")
+    )
+    try:
+        with open(data_path) as f:
+            dataset = json.load(f)
+    except Exception:
+        dataset = []
+
+    entry_map = {e.get("phone_number"): e for e in dataset}
+
+    def add_relation(target: str, name: Optional[str], rel: str, source: str) -> None:
+        data = {
+            "phone_number": target,
+            "name": name,
+            "relationship": rel,
+            "source": source,
+        }
+        if data not in relationships:
+            relationships.append(data)
+            nodes.append({"id": target, "label": name or target})
+            edges.append({"from": number, "to": target, "label": rel})
+            rel_logger.info("%s\t%s\t%s\t%s", number, target, rel, source)
+
+    # direct connections from dataset
+    if number in entry_map:
+        entry = entry_map[number]
+        for conn in entry.get("connections", []):
+            target = entry_map.get(conn)
+            add_relation(
+                conn,
+                target.get("name") if target else None,
+                "known connection",
+                "mock dataset",
+            )
+
+    # connections pointing back to this number or shared data
+    for pn, entry in entry_map.items():
+        if pn == number:
+            continue
+        if number in entry.get("connections", []):
+            add_relation(pn, entry.get("name"), "linked connection", "mock dataset")
+        if set(accounts) & set(entry.get("accounts", [])):
+            add_relation(pn, entry.get("name"), "shared social account", "mock dataset")
+
+    graph = {"nodes": nodes, "edges": edges}
+    return relationships, graph
 
 
 def analyze_phone(phone_number: str) -> dict:
@@ -104,6 +168,8 @@ def analyze_phone(phone_number: str) -> dict:
         "name": None,
         "accounts": [],
         "breaches": [],
+        "connections": [],
+        "graph": {},
     }
 
     try:
@@ -130,6 +196,9 @@ def analyze_phone(phone_number: str) -> dict:
 
         result["accounts"] = _query_maigret(phone_number)
         result["breaches"] = _query_hibp(phone_number)
+        result["connections"], result["graph"] = build_relationship_map(
+            phone_number, result["accounts"], result["breaches"]
+        )
     except Exception as exc:
         resp = {
             "status": "error",
