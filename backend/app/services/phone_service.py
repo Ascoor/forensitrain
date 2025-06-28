@@ -3,6 +3,8 @@ import os
 import subprocess
 from datetime import datetime
 from typing import List, Dict, Optional
+import asyncio
+import time
 
 import logging
 
@@ -91,11 +93,28 @@ def _query_hibp(number: str) -> List[str]:
     return []
 
 
+async def _a_query_numverify(number: str) -> Dict:
+    return await asyncio.to_thread(_query_numverify, number)
+
+
+async def _a_query_maigret(number: str) -> List[str]:
+    return await asyncio.to_thread(_query_maigret, number)
+
+
+async def _a_query_hibp(number: str) -> List[str]:
+    return await asyncio.to_thread(_query_hibp, number)
+
+
 def _log_query(phone: str, status: str, error: Optional[str] = None) -> None:
     if error:
         logging.error("%s\t%s", phone, error)
     else:
         logging.info("%s\t%s", phone, status)
+
+
+def _log_source_time(phone: str, source: str, duration: float) -> None:
+    """Log time taken for a specific source lookup."""
+    logging.info("%s\t%s_time\t%.2f", phone, source, duration)
 
 
 def build_relationship_map(
@@ -153,6 +172,12 @@ def build_relationship_map(
 
     graph = {"nodes": nodes, "edges": edges}
     return relationships, graph
+
+
+async def _a_build_relationship_map(
+    number: str, accounts: List[str], breaches: List[str]
+) -> (List[Dict], Dict):
+    return await asyncio.to_thread(build_relationship_map, number, accounts, breaches)
 
 
 def analyze_phone(phone_number: str) -> dict:
@@ -213,6 +238,98 @@ def analyze_phone(phone_number: str) -> dict:
         "status": "success",
         "data": result,
         "errors": None,
+        "timestamp": datetime.utcnow().isoformat() + "Z",
+    }
+
+    CACHE[phone_number] = resp
+    _log_query(phone_number, resp["status"])
+    return resp
+
+
+async def multi_source_lookup(phone_number: str) -> dict:
+    """Run multiple OSINT lookups concurrently for a phone number."""
+    if phone_number in CACHE:
+        return CACHE[phone_number]
+
+    result: Dict = {
+        "phone_number": phone_number,
+        "valid": False,
+        "country": "Unknown",
+        "carrier": None,
+        "name": None,
+        "accounts": [],
+        "breaches": [],
+        "connections": [],
+        "graph": {},
+        "sources_used": [],
+    }
+
+    errors: Dict[str, Optional[str]] = {}
+    timings: Dict[str, float] = {}
+
+    # parse phone number first
+    try:
+        parsed = phonenumbers.parse(phone_number, None)
+        result["valid"] = phonenumbers.is_valid_number(parsed)
+        result["country"] = geocoder.description_for_number(parsed, "en")
+        result["carrier"] = carrier.name_for_number(parsed, "en")
+        result["sources_used"].append("phonenumbers")
+    except phonenumbers.NumberParseException:
+        resp = {
+            "status": "error",
+            "data": None,
+            "errors": {"phonenumbers": "invalid"},
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+        }
+        _log_query(phone_number, resp["status"], "Invalid phone number")
+        return resp
+
+    async def run_source(name: str, coro):
+        start = time.perf_counter()
+        try:
+            res = await coro
+            timings[name] = time.perf_counter() - start
+            _log_source_time(phone_number, name, timings[name])
+            return res
+        except Exception as exc:
+            timings[name] = time.perf_counter() - start
+            _log_source_time(phone_number, name, timings[name])
+            errors[name] = str(exc)
+            return None
+
+    tasks = {
+        "numverify": asyncio.create_task(run_source("numverify", _a_query_numverify(phone_number))),
+        "maigret": asyncio.create_task(run_source("maigret", _a_query_maigret(phone_number))),
+        "hibp": asyncio.create_task(run_source("hibp", _a_query_hibp(phone_number))),
+    }
+
+    results = await asyncio.gather(*tasks.values())
+    meta, accounts, breaches = results
+
+    if meta:
+        result["carrier"] = meta.get("carrier") or result["carrier"]
+        result["line_type"] = meta.get("line_type")
+        result["name"] = meta.get("location")
+        result["sources_used"].append("numverify")
+
+    if accounts is not None:
+        result["accounts"] = accounts
+        if accounts:
+            result["sources_used"].append("maigret")
+
+    if breaches is not None:
+        result["breaches"] = breaches
+        if breaches is not None:
+            result["sources_used"].append("hibp")
+
+    connections, graph = await _a_build_relationship_map(phone_number, result["accounts"], result["breaches"])
+    result["connections"] = connections
+    result["graph"] = graph
+
+    resp = {
+        "status": "success",
+        "data": result,
+        "errors": errors or None,
         "timestamp": datetime.utcnow().isoformat() + "Z",
     }
 
