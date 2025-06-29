@@ -18,3 +18,6 @@ opencv-python-headless
 email-validator
 
 networkx
+snscrape
+extractor-phone-email
+sherlock
