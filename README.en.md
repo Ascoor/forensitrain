@@ -18,7 +18,7 @@ potential social media profiles and known breach exposure.
 - Bilingual UI with dark mode
 - Unified enrichment endpoint returning a confidence score
 
-This project is provided **for educational and lawful OSINT use only**. Ensure
+This project is provided **for legal and educational OSINT use only**. Ensure
 you comply with local laws and API terms of service before running queries.
 
 For a history of changes, see [CHANGELOG.md](CHANGELOG.md).
