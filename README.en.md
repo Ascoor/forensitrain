@@ -18,7 +18,7 @@ potential social media profiles and known breach exposure.
 - Bilingual UI with dark mode
 - Unified enrichment endpoint returning a confidence score
 
-This project is provided **for educational and lawful OSINT use only**. Ensure
+This project is provided **for legal and educational OSINT use only**. Ensure
 you comply with local laws and API terms of service before running queries.
 
 For a history of changes, see [CHANGELOG.md](CHANGELOG.md).
@@ -28,7 +28,7 @@ shows a short landing page that explains how to start the React frontend. The
 actual user interface runs at `http://localhost:5173` when launched via
 `npm run dev`.
 
-## Local Development (No Docker)
+## Local Development
 
 ### Backend
 
@@ -68,7 +68,7 @@ All phone lookups are logged to `logs/queries.log`.
 
 ### Unified Startup Script
 
-To automatically set up both services without Docker run:
+To automatically set up both services run:
 
 ```bash
 ./forensitrain_start.sh
@@ -87,19 +87,4 @@ dependencies, and launches the API and React frontend concurrently.
    confidence score.
 5. Check `logs/queries.log` for a new entry.
 6. Try an invalid number to verify an error message is shown.
-
-## Docker Deployment
-
-1. Build and start the stack:
-   ```bash
-   docker-compose up --build
-   ```
-   The backend will run on port `8000` and the frontend on ports `80`/`443`.
-3. (Optional) Acquire TLS certificates using Let's Encrypt:
-   ```bash
-   ./deploy/certbot.sh yourdomain.com
-   ```
-   Certificates are stored in `./certbot/conf` and mounted into the Nginx container.
-
-The frontend is served via Nginx which also proxies `/api/` requests to the FastAPI backend running with Gunicorn.
 

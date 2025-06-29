@@ -6,6 +6,7 @@ from slowapi.errors import RateLimitExceeded
 
 from .routes.phone import router as phone_router, limiter, rate_limit_handler
 from .routes.image import router as image_router
+from .routes.social import router as social_router
 
 load_dotenv()
 
@@ -45,3 +46,4 @@ def health_check():
 # Include phone analysis routes
 app.include_router(phone_router, prefix="/api/phone")
 app.include_router(image_router, prefix="/api")
+app.include_router(social_router, prefix="/api/social")
