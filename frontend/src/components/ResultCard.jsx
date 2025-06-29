@@ -17,18 +17,19 @@ const ResultCard = ({ data }) => {
   return (
     <div className="border p-4 rounded shadow">
       <div className="flex gap-2 mb-2">
-        {tabs.map((t) => (
-          <button
-            key={t}
-            className={`px-2 py-1 border rounded ${tab === t ? 'bg-blue-500 text-white' : ''}`}
-            onClick={() => setTab(t)}
-          >
-            {t === 'general' && t('general')}
-            {t === 'accounts' && t('accounts')}
-            {t === 'breaches' && t('breaches')}
-            {t === 'emails' && t('emails')}
-          </button>
-        ))}
+       {tabs.map((tabKey) => (
+  <button
+    key={tabKey}
+    className={`px-2 py-1 border rounded ${tab === tabKey ? 'bg-blue-500 text-white' : ''}`}
+    onClick={() => setTab(tabKey)}
+  >
+    {tabKey === 'general' && t('general')}
+    {tabKey === 'accounts' && t('accounts')}
+    {tabKey === 'breaches' && t('breaches')}
+    {tabKey === 'emails' && t('emails')}
+  </button>
+))}
+
       </div>
 
       {tab === 'general' && (

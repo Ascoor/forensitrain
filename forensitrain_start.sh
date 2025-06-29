@@ -4,84 +4,80 @@ set -e
 
 echo "🚀 Starting ForensiTrain..."
 
-# التحقق من المتطلبات
-PYTHON_BIN=${PYTHON_BIN:-python3.10}
-for cmd in "$PYTHON_BIN" pip npm cmake; do
-  if ! command -v $cmd &> /dev/null; then
-    echo "❌ $cmd is not installed. Please install it first."
+# --------🔍 تحقق من الأدوات المطلوبة ----------
+PYTHON_BIN=${PYTHON_BIN:-python3.12}
+
+REQUIRED_CMDS=("$PYTHON_BIN" pip npm cmake)
+for cmd in "${REQUIRED_CMDS[@]}"; do
+  if ! command -v "$cmd" &> /dev/null; then
+    echo "❌ Missing required command: $cmd"
     exit 1
   fi
 done
 
+# --------📦 إنشاء بيئة Python افتراضية --------
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
-
-# ---- Backend ----
 cd "$SCRIPT_DIR/backend"
 
-# إنشاء وتفعيل بيئة venv
 if [ ! -d "venv" ]; then
-    echo "📦 Creating virtual environment..."
-    "$PYTHON_BIN" -m venv venv
+  echo "📦 Creating virtual environment..."
+  "$PYTHON_BIN" -m venv venv
 fi
+
 source venv/bin/activate
 
-# تحديث pip
+# --------🔁 تحديث pip وتثبيت المتطلبات --------
+echo "📦 Upgrading pip..."
 pip install --upgrade pip
 
-# تثبيت الحزم الأساسية المطلوبة لبناء dlib
 echo "📦 Installing system dependencies for dlib..."
 sudo apt update
 sudo apt install -y build-essential cmake libopenblas-dev liblapack-dev libx11-dev libgtk-3-dev
 
-# تثبيت dlib بدون دعم GUI (لحل مشاكل التوافق)
 if ! pip show dlib &>/dev/null; then
-    echo "📦 Installing dlib..."
-    pip install dlib --config-settings=--define="DLIB_NO_GUI_SUPPORT=1"
+  echo "📦 Installing dlib (no GUI)..."
+  pip install dlib --config-settings=--define="DLIB_NO_GUI_SUPPORT=1"
 fi
 
-# تثبيت face_recognition_models يدويًا (مطلوب)
 if ! pip show face_recognition_models &>/dev/null; then
-    echo "📦 Installing face_recognition_models..."
-    pip install git+https://github.com/ageitgey/face_recognition_models
+  echo "📦 Installing face_recognition_models..."
+  pip install git+https://github.com/ageitgey/face_recognition_models
 fi
 
-# تثبيت بقية المتطلبات
 echo "📦 Installing backend requirements..."
 pip install -r requirements.txt
 
-# تحميل متغيرات .env إن وجدت
 if [ -f .env ]; then
-    echo "📦 Loading .env variables..."
-    export $(grep -v '^#' .env | xargs) || true
+  echo "📦 Loading environment variables from .env..."
+  export $(grep -v '^#' .env | xargs) || true
 fi
 
-# تشغيل الـ backend
+# --------🚀 تشغيل الـ Backend --------
 mkdir -p "$SCRIPT_DIR/logs"
-echo "🚀 Starting backend on http://localhost:8000 ..."
+echo "🚀 Starting backend at http://localhost:8000 ..."
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload > "$SCRIPT_DIR/logs/backend.log" 2>&1 &
 BACKEND_PID=$!
-cd "$SCRIPT_DIR"
 
-# ---- Frontend ----
+# --------🧩 تشغيل الـ Frontend --------
 cd "$SCRIPT_DIR/frontend"
 
-# تثبيت حزم npm
 if [ ! -d "node_modules" ]; then
-    echo "📦 Installing frontend packages..."
-    npm install
+  echo "📦 Installing frontend packages..."
+  npm install
 fi
 
-echo "🚀 Starting frontend on http://localhost:7000 ..."
+echo "🚀 Starting frontend at http://localhost:7000 ..."
 npm run dev > "$SCRIPT_DIR/logs/frontend.log" 2>&1 &
 FRONTEND_PID=$!
+
 cd "$SCRIPT_DIR"
 
-# التعامل مع الإنهاء
+# --------🛑 التعامل مع إيقاف السكريبت --------
 trap 'echo -e "\n🛑 Stopping services..."; kill $BACKEND_PID $FRONTEND_PID; exit 0' INT TERM
 
 echo ""
 echo "✅ ForensiTrain is running successfully!"
-echo "🌐 Access the frontend at http://localhost:7000"
-echo "🛠️  API backend (docs): http://localhost:8000/docs"
+echo "🌐 Frontend: http://localhost:7000"
+echo "🛠️  Backend API (Docs): http://localhost:8000/docs"
 
 wait $BACKEND_PID $FRONTEND_PID

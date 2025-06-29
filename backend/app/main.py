@@ -27,8 +27,15 @@ def _check_dependencies():
             status[name] = f"error: {exc}"
     try:  # GPU check
         import tensorflow as tf
-
         gpu = tf.config.list_physical_devices("GPU")
+        if not gpu:
+            gpu = tf.config.list_physical_devices("XLA_GPU")
+        if not gpu:
+            gpu = tf.config.list_physical_devices("TPU")
+        if not gpu:
+            gpu = tf.config.list_physical_devices("XLA_TPU")
+        if not gpu:
+            gpu = tf.config.list_physical_devices("CPU")
         status["tensorflow_gpu"] = bool(gpu)
     except Exception:  # noqa: BLE001
         pass
@@ -46,11 +53,12 @@ async def startup_event() -> None:
 # Allow frontend development origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:7000", "http://localhost:3000", "*"],
+    allow_origins=["http://localhost:7000"],  # لا تستخدم "*" مع allow_credentials=True
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 
 @app.get("/", include_in_schema=False)

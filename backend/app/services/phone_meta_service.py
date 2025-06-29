@@ -1,7 +1,6 @@
 import phonenumbers
 from phonenumbers import carrier, geocoder, number_type, PhoneNumberType
 
-
 def parse_phone(number: str) -> dict:
     """Return basic metadata about a phone number using phonenumbers."""
     data = {
@@ -17,7 +16,7 @@ def parse_phone(number: str) -> dict:
         data["country"] = geocoder.description_for_number(parsed, "en")
         data["carrier"] = carrier.name_for_number(parsed, "en") or None
         type_enum = number_type(parsed)
-        data["line_type"] = PhoneNumberType._VALUES_TO_NAMES.get(type_enum)
+        data["line_type"] = str(type_enum).replace("PhoneNumberType.", "")
     except phonenumbers.NumberParseException:
         pass
     return data
