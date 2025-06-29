@@ -16,3 +16,19 @@ export const analyzePhone = async (phoneNumber) => {
   }
   return data.data
 }
+
+export const exportReport = async (phoneNumber, fmt = 'json') => {
+  const res = await fetch(`${API_BASE}/phone/export?fmt=${fmt}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phone_number: phoneNumber })
+  })
+  if (!res.ok) {
+    throw new Error('Request failed')
+  }
+  if (fmt === 'pdf') {
+    const blob = await res.blob()
+    return blob
+  }
+  return await res.json()
+}

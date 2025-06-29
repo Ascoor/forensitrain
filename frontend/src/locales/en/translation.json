@@ -1,0 +1,12 @@
+{
+  "title": "ForensiTrain",
+  "search_placeholder": "e.g. +12024561111",
+  "search": "Search",
+  "loading": "Loading...",
+  "legal": "This tool is for lawful OSINT use only.",
+  "general": "General Info",
+  "accounts": "Social Accounts",
+  "breaches": "Breach History",
+  "emails": "Emails",
+  "export": "Export"
+}

@@ -10,7 +10,10 @@ potential social media profiles and known breach exposure.
 - Phone number parsing with `phonenumbers`
 - Carrier and line type lookup via NumVerify
 - Social profile discovery using Maigret
+- Optional Sherlock lookup for more profiles
 - Breach checks through HaveIBeenPwned
+- Export reports as JSON or PDF
+- Bilingual UI with dark mode
 - Unified enrichment endpoint returning a confidence score
 
 This project is provided **for educational and lawful OSINT use only**. Ensure

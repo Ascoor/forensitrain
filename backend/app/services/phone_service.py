@@ -78,6 +78,12 @@ def _query_maigret(number: str) -> List[str]:
     return profiles
 
 
+def _query_sherlock(number: str) -> List[str]:
+    """Stub for Sherlock search by phone, returns empty list."""
+    # Real implementation would invoke the Sherlock tool
+    return []
+
+
 def _query_hibp(number: str) -> List[str]:
     """Check HaveIBeenPwned for breach exposure."""
     if not HIBP_API_KEY:
@@ -103,6 +109,10 @@ async def _a_query_maigret(number: str) -> List[str]:
 
 async def _a_query_hibp(number: str) -> List[str]:
     return await asyncio.to_thread(_query_hibp, number)
+
+
+async def _a_query_sherlock(number: str) -> List[str]:
+    return await asyncio.to_thread(_query_sherlock, number)
 
 
 def _lookup_emails(number: str) -> List[str]:
@@ -371,11 +381,14 @@ async def multi_source_lookup(phone_number: str) -> dict:
     tasks = {
         "numverify": asyncio.create_task(run_source("numverify", _a_query_numverify(phone_number))),
         "maigret": asyncio.create_task(run_source("maigret", _a_query_maigret(phone_number))),
+        "sherlock": asyncio.create_task(run_source("sherlock", _a_query_sherlock(phone_number))),
         "hibp": asyncio.create_task(run_source("hibp", _a_query_hibp(phone_number))),
     }
 
     results = await asyncio.gather(*tasks.values())
-    meta, accounts, breaches = results
+    meta, maigret_accounts, sherlock_accounts, breaches = results
+
+    accounts = list(dict.fromkeys((maigret_accounts or []) + (sherlock_accounts or [])))
 
     emails = _lookup_emails(phone_number)
     result["emails"] = emails

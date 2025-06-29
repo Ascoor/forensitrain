@@ -1,7 +1,9 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 
 const PhoneInput = ({ onSearch }) => {
   const [phone, setPhone] = useState('')
+  const { t } = useTranslation()
 
   const submit = (e) => {
     e.preventDefault()
@@ -16,11 +18,11 @@ const PhoneInput = ({ onSearch }) => {
         type="text"
         value={phone}
         onChange={(e) => setPhone(e.target.value)}
-        placeholder="e.g. +12024561111"
+        placeholder={t('search_placeholder')}
         className="border p-2 flex-1"
       />
       <button type="submit" className="bg-blue-500 text-white px-4 py-2">
-        Search
+        {t('search')}
       </button>
     </form>
   )
