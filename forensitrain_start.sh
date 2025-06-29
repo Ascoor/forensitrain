@@ -5,7 +5,16 @@ set -e
 echo "🚀 Starting ForensiTrain..."
 
 # Check prerequisites
-command -v python >/dev/null 2>&1 || { echo "Python is not installed" >&2; exit 1; }
+if command -v python3.11 >/dev/null 2>&1; then
+    PYTHON_BIN=$(command -v python3.11)
+elif command -v python3 >/dev/null 2>&1; then
+    PYTHON_BIN=$(command -v python3)
+elif command -v python >/dev/null 2>&1; then
+    PYTHON_BIN=$(command -v python)
+else
+    echo "Python is not installed" >&2
+    exit 1
+fi
 command -v npm >/dev/null 2>&1 || { echo "npm is not installed" >&2; exit 1; }
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
@@ -13,7 +22,7 @@ SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 # ---- Backend ----
 cd "$SCRIPT_DIR/backend"
 if [ ! -d "venv" ]; then
-    python -m venv venv
+    "$PYTHON_BIN" -m venv venv
 fi
 # shellcheck disable=SC1091
 source venv/bin/activate

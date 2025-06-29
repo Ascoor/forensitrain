@@ -28,6 +28,13 @@ shows a short landing page that explains how to start the React frontend. The
 actual user interface runs at `http://localhost:5173` when launched via
 `npm run dev`.
 
+## Requirements
+
+- Python 3.10 or later (3.11 recommended). `dlib`, a dependency of
+  `face_recognition`, does not yet provide prebuilt wheels for Python 3.12,
+  which leads to extremely slow installation.
+- Node.js 18 or newer.
+
 ## Local Development
 
 ### Backend
@@ -35,7 +42,7 @@ actual user interface runs at `http://localhost:5173` when launched via
 1. Create a Python virtual environment and activate it:
    ```bash
    cd backend
-   python -m venv venv
+   python3.11 -m venv venv
    source venv/bin/activate  # on Windows use venv\Scripts\activate
    ```
 2. Install dependencies (includes `opencv-python-headless` for image analysis):
