@@ -68,8 +68,8 @@ actual user interface runs at `http://localhost:5173` when launched via
    ```
 
 The React app will load at http://localhost:5173. By default it queries the API
-at `http://localhost:8000/api`. You can override this by creating a `.env`
-file in `frontend/` containing `VITE_API_BASE=http://yourhost:8000/api`.
+at `/api` by default. You can override this by creating a `.env` file
+in `frontend/` containing `VITE_API_BASE=http://localhost:8000/api` for local development.
 
 All phone lookups are logged to `logs/queries.log`.
 

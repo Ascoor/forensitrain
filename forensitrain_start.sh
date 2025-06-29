@@ -79,8 +79,8 @@ cd "$SCRIPT_DIR"
 trap 'echo -e "\n🛑 Stopping services..."; kill $BACKEND_PID $FRONTEND_PID; exit 0' INT TERM
 
 echo ""
-echo "✅ ForensiTrain is running!"
-echo "➜  Frontend: http://localhost:7000/"
-echo "➜  Backend (docs): http://localhost:8000/docs"
+echo "✅ ForensiTrain is running successfully!"
+echo "🌐 Access the frontend at http://localhost:7000"
+echo "🛠️  API backend (docs): http://localhost:8000/docs"
 
 wait $BACKEND_PID $FRONTEND_PID

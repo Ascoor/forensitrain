@@ -63,7 +63,7 @@ npm run dev
 ## 📁 ملفات التكوين والمفاتيح
 
 ```bash
-# frontend/.env
+# frontend/.env (for local development)
 VITE_API_BASE=http://localhost:8000/api
 ```
 
