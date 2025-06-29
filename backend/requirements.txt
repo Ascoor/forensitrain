@@ -6,3 +6,8 @@ python-dotenv
 slowapi
 gunicorn
 reportlab
+face_recognition
+cvlib
+pytesseract
+piexif
+Pillow
