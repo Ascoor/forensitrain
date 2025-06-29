@@ -7,6 +7,13 @@ from .phone_service import (
 from .osint_service import extract_osint_footprint
 from .recursive_osint_engine import smart_osint_lookup
 from .identity_enrichment_service import enrich_identity
+from .misc_profile_service import (
+    extract_text_from_image,
+    validate_and_normalize_email,
+    find_profiles_by_email,
+    find_profiles_by_name,
+    aggregate_results,
+)
 
 __all__ = [
     'analyze_phone',
@@ -16,4 +23,9 @@ __all__ = [
     'extract_osint_footprint',
     'smart_osint_lookup',
     'enrich_identity',
+    'extract_text_from_image',
+    'validate_and_normalize_email',
+    'find_profiles_by_email',
+    'find_profiles_by_name',
+    'aggregate_results',
 ]

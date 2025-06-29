@@ -99,3 +99,20 @@ returns a list of optional packages and whether they loaded successfully.
 5. Check `logs/queries.log` for a new entry.
 6. Try an invalid number to verify an error message is shown.
 
+### Extra OSINT Utilities
+
+Some advanced helpers require free API keys. Create a `.env` file in
+`backend/` with the following variables:
+
+```
+OCR_SPACE_KEY=your_ocr_space_key
+ANYMAILFINDER_KEY=your_anymailfinder_key
+PROXYCURL_KEY=your_proxycurl_key
+APIFY_TOKEN=your_apify_token
+SOCIAL_SEARCHER_KEY=your_social_searcher_key
+```
+
+All mentioned services offer free tiers. Sign up on their sites and copy the
+provided keys. The helper functions in `misc_profile_service.py` will use these
+keys automatically.
+
