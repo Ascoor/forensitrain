@@ -4,7 +4,6 @@ from PIL import Image
 import numpy as np
 import pytesseract
 import piexif
-import cvlib as cv
 
 
 def _extract_exif(img: Image.Image) -> Dict[str, str]:
@@ -38,7 +37,14 @@ def _infer_platform(text: str) -> Optional[str]:
 
 
 def analyze_image_bytes(data: bytes) -> Dict:
-    import face_recognition
+    try:
+        import face_recognition
+    except Exception:  # noqa: BLE001
+        face_recognition = None
+    try:
+        import cvlib as cv
+    except Exception:  # noqa: BLE001
+        cv = None
 
     img = Image.open(io.BytesIO(data))
     width, height = img.size
@@ -48,9 +54,14 @@ def analyze_image_bytes(data: bytes) -> Dict:
     text = pytesseract.image_to_string(img)
 
     arr = np.array(img.convert("RGB"))
-    faces = face_recognition.face_locations(arr)
-    bbox, labels, conf = cv.detect_common_objects(arr, confidence=0.25, model="yolov3-tiny")
-    objects = list(set(labels))
+    faces = face_recognition.face_locations(arr) if face_recognition else []
+    if cv:
+        bbox, labels, _ = cv.detect_common_objects(
+            arr, confidence=0.25, model="yolov3-tiny"
+        )
+        objects = list(set(labels))
+    else:
+        objects = []
 
     platform = _infer_platform(text)
     return {

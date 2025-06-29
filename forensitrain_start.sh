@@ -5,7 +5,8 @@ set -e
 echo "🚀 Starting ForensiTrain..."
 
 # التحقق من المتطلبات
-for cmd in python3 pip npm cmake; do
+PYTHON_BIN=${PYTHON_BIN:-python3.10}
+for cmd in "$PYTHON_BIN" pip npm cmake; do
   if ! command -v $cmd &> /dev/null; then
     echo "❌ $cmd is not installed. Please install it first."
     exit 1
@@ -20,7 +21,7 @@ cd "$SCRIPT_DIR/backend"
 # إنشاء وتفعيل بيئة venv
 if [ ! -d "venv" ]; then
     echo "📦 Creating virtual environment..."
-    python3 -m venv venv
+    "$PYTHON_BIN" -m venv venv
 fi
 source venv/bin/activate
 
