@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa'
 
 const platformIcon = (url) => {
@@ -11,6 +12,7 @@ const platformIcon = (url) => {
 const ResultCard = ({ data }) => {
   const [tab, setTab] = useState('general')
   const tabs = ['general', 'accounts', 'breaches', 'emails']
+  const { t } = useTranslation()
 
   return (
     <div className="border p-4 rounded shadow">
@@ -21,10 +23,10 @@ const ResultCard = ({ data }) => {
             className={`px-2 py-1 border rounded ${tab === t ? 'bg-blue-500 text-white' : ''}`}
             onClick={() => setTab(t)}
           >
-            {t === 'general' && 'General Info'}
-            {t === 'accounts' && 'Social Accounts'}
-            {t === 'breaches' && 'Breach History'}
-            {t === 'emails' && 'Emails'}
+            {t === 'general' && t('general')}
+            {t === 'accounts' && t('accounts')}
+            {t === 'breaches' && t('breaches')}
+            {t === 'emails' && t('emails')}
           </button>
         ))}
       </div>
