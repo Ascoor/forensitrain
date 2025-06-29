@@ -1,6 +1,4 @@
-import React from 'react';
-import { ForceGraph2D } from 'react-force-graph';
-
+import React from 'react'; 
 const GraphView = ({ graph }) => {
   if (!graph || !graph.nodes) return null;
   return (
