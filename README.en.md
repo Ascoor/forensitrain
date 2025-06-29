@@ -30,9 +30,9 @@ actual user interface runs at `http://localhost:5173` when launched via
 
 ## Requirements
 
-- Python 3.10 or later (3.11 recommended). `dlib`, a dependency of
-  `face_recognition`, does not yet provide prebuilt wheels for Python 3.12,
-  which leads to extremely slow installation.
+- Python 3.10 (3.11 is also supported). `dlib`, a dependency of
+  `face_recognition`, still lacks wheels for Python 3.12, so staying on 3.10
+  avoids long build times.
 - Node.js 18 or newer.
 
 ## Local Development
@@ -42,7 +42,7 @@ actual user interface runs at `http://localhost:5173` when launched via
 1. Create a Python virtual environment and activate it:
    ```bash
    cd backend
-   python3.11 -m venv venv
+   python3.10 -m venv venv
    source venv/bin/activate  # on Windows use venv\Scripts\activate
    ```
 2. Install dependencies (includes `opencv-python-headless` for image analysis):
@@ -83,6 +83,9 @@ To automatically set up both services run:
 
 The script creates the backend virtual environment if needed, installs
 dependencies, and launches the API and React frontend concurrently.
+
+You can verify heavy dependencies by calling `/api/health`. The endpoint
+returns a list of optional packages and whether they loaded successfully.
 
 ### Manual Testing
 

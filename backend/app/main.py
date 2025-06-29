@@ -1,8 +1,10 @@
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from slowapi.errors import RateLimitExceeded
+import importlib
+
 
 from .routes.phone import router as phone_router, limiter, rate_limit_handler
 from .routes.image import router as image_router
@@ -12,8 +14,34 @@ load_dotenv()
 
 app = FastAPI(title="ForensiTrain API")
 
+
+def _check_dependencies():
+    """Attempt to import heavy optional packages."""
+    modules = ["cvlib", "face_recognition", "tensorflow", "dlib"]
+    status = {}
+    for name in modules:
+        try:
+            importlib.import_module(name)
+            status[name] = "available"
+        except Exception as exc:  # noqa: BLE001
+            status[name] = f"error: {exc}"
+    try:  # GPU check
+        import tensorflow as tf
+
+        gpu = tf.config.list_physical_devices("GPU")
+        status["tensorflow_gpu"] = bool(gpu)
+    except Exception:  # noqa: BLE001
+        pass
+    return status
+
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
+
+
+@app.on_event("startup")
+async def startup_event() -> None:
+    """Check heavy dependencies once at startup."""
+    app.state.dependencies = _check_dependencies()
 
 # Allow frontend development origins
 app.add_middleware(
@@ -41,7 +69,9 @@ def index() -> HTMLResponse:
 
 @app.get("/api/health")
 def health_check():
-    return {"status": "ok"}
+    """Return app status and availability of heavy dependencies."""
+    deps = getattr(app.state, "dependencies", {})
+    return {"status": "ok", "dependencies": deps}
 
 # Include phone analysis routes
 app.include_router(phone_router, prefix="/api/phone")
