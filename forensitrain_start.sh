@@ -2,14 +2,7 @@
 
 set -e
 
-echo "🚀 Starting ForensiTrain..."
-
-# Check prerequisites
-PYTHON_BIN=$(command -v python3.11 || command -v python3 || command -v python)
-if [ -z "$PYTHON_BIN" ]; then
-    echo "Python is not installed" >&2
-    exit 1
-fi
+echo "🚀 Starting ForensiTrain..." 
 command -v npm >/dev/null 2>&1 || { echo "❌ npm is not installed"; exit 1; }
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
@@ -20,7 +13,7 @@ cd "$SCRIPT_DIR/backend"
 # إنشاء البيئة الافتراضية إذا لم تكن موجودة
 if [ ! -d "venv" ]; then
     echo "📦 Creating virtual environment..."
-    "$PYTHON_BIN" -m venv venv
+
 fi
 
 # تفعيل البيئة الافتراضية
