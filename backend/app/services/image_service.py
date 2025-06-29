@@ -4,7 +4,6 @@ from PIL import Image
 import numpy as np
 import pytesseract
 import piexif
-import face_recognition
 import cvlib as cv
 
 
@@ -39,6 +38,8 @@ def _infer_platform(text: str) -> Optional[str]:
 
 
 def analyze_image_bytes(data: bytes) -> Dict:
+    import face_recognition
+
     img = Image.open(io.BytesIO(data))
     width, height = img.size
     fmt = img.format or "unknown"
