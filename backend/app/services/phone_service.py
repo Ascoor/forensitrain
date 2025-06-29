@@ -105,6 +105,47 @@ async def _a_query_hibp(number: str) -> List[str]:
     return await asyncio.to_thread(_query_hibp, number)
 
 
+def _lookup_emails(number: str) -> List[str]:
+    """Return known emails for a phone number from the mock dataset."""
+    data_path = os.path.abspath(
+        os.path.join(os.path.dirname(__file__), "../data/mock_data.json")
+    )
+    try:
+        with open(data_path) as f:
+            dataset = json.load(f)
+        for entry in dataset:
+            if entry.get("phone_number") == number and entry.get("email"):
+                return [entry["email"]]
+    except Exception:
+        pass
+    return []
+
+
+async def _a_lookup_emails(number: str) -> List[str]:
+    return await asyncio.to_thread(_lookup_emails, number)
+
+
+def _query_email_hibp(email: str) -> List[str]:
+    """Check HIBP for breaches related to an email address."""
+    if not HIBP_API_KEY:
+        return []
+    url = (
+        f"https://haveibeenpwned.com/api/v3/breachedaccount/{email}?truncateResponse=true"
+    )
+    headers = {"hibp-api-key": HIBP_API_KEY, "user-agent": "ForensiTrain"}
+    try:
+        resp = requests.get(url, headers=headers, timeout=10)
+        if resp.status_code == 200:
+            return [b.get("Name") for b in resp.json()]
+    except Exception:
+        pass
+    return []
+
+
+async def _a_query_email_hibp(email: str) -> List[str]:
+    return await asyncio.to_thread(_query_email_hibp, email)
+
+
 def _log_query(phone: str, status: str, error: Optional[str] = None) -> None:
     if error:
         logging.error("%s\t%s", phone, error)
@@ -118,7 +159,7 @@ def _log_source_time(phone: str, source: str, duration: float) -> None:
 
 
 def build_relationship_map(
-    number: str, accounts: List[str], breaches: List[str]
+    number: str, accounts: List[str], breaches: List[str], emails: Optional[List[str]] = None
 ) -> (List[Dict], Dict):
     """Create relationship mapping for a phone number based on mock data."""
     relationships: List[Dict] = []
@@ -135,6 +176,7 @@ def build_relationship_map(
         dataset = []
 
     entry_map = {e.get("phone_number"): e for e in dataset}
+    email_map = {e.get("phone_number"): e.get("email") for e in dataset if e.get("email")}
 
     def add_relation(target: str, name: Optional[str], rel: str, source: str) -> None:
         data = {
@@ -152,6 +194,23 @@ def build_relationship_map(
     # direct connections from dataset
     if number in entry_map:
         entry = entry_map[number]
+        email = entry.get("email")
+        if email:
+            if not any(n.get("id") == email for n in nodes):
+                nodes.append({"id": email, "label": email})
+            edges.append({"from": number, "to": email, "label": "email"})
+            relationships.append(
+                {
+                    "email": email,
+                    "relationship": "associated email",
+                    "source": "mock dataset",
+                }
+            )
+            rel_logger.info("%s\t%s\t%s\t%s", number, email, "email", "mock dataset")
+            for pn, em in email_map.items():
+                if em == email and pn != number:
+                    add_relation(pn, entry_map.get(pn, {}).get("name"), "shared email", "mock dataset")
+                    edges.append({"from": email, "to": pn, "label": "shared email"})
         for conn in entry.get("connections", []):
             target = entry_map.get(conn)
             add_relation(
@@ -175,9 +234,9 @@ def build_relationship_map(
 
 
 async def _a_build_relationship_map(
-    number: str, accounts: List[str], breaches: List[str]
+    number: str, accounts: List[str], breaches: List[str], emails: Optional[List[str]] = None
 ) -> (List[Dict], Dict):
-    return await asyncio.to_thread(build_relationship_map, number, accounts, breaches)
+    return await asyncio.to_thread(build_relationship_map, number, accounts, breaches, emails)
 
 
 def analyze_phone(phone_number: str) -> dict:
@@ -193,6 +252,8 @@ def analyze_phone(phone_number: str) -> dict:
         "name": None,
         "accounts": [],
         "breaches": [],
+        "emails": [],
+        "email_breaches": [],
         "connections": [],
         "graph": {},
     }
@@ -221,8 +282,16 @@ def analyze_phone(phone_number: str) -> dict:
 
         result["accounts"] = _query_maigret(phone_number)
         result["breaches"] = _query_hibp(phone_number)
+        result["emails"] = _lookup_emails(phone_number)
+        email_breaches = []
+        for em in result["emails"]:
+            email_breaches.extend(_query_email_hibp(em))
+        result["email_breaches"] = list(dict.fromkeys(email_breaches))
         result["connections"], result["graph"] = build_relationship_map(
-            phone_number, result["accounts"], result["breaches"]
+            phone_number,
+            result["accounts"],
+            result["breaches"],
+            result["emails"],
         )
     except Exception as exc:
         resp = {
@@ -259,6 +328,8 @@ async def multi_source_lookup(phone_number: str) -> dict:
         "name": None,
         "accounts": [],
         "breaches": [],
+        "emails": [],
+        "email_breaches": [],
         "connections": [],
         "graph": {},
         "sources_used": [],
@@ -306,6 +377,17 @@ async def multi_source_lookup(phone_number: str) -> dict:
     results = await asyncio.gather(*tasks.values())
     meta, accounts, breaches = results
 
+    emails = _lookup_emails(phone_number)
+    result["emails"] = emails
+    if emails:
+        result["sources_used"].append("mock dataset")
+    email_breaches: List[str] = []
+    for em in emails:
+        email_breaches.extend(_query_email_hibp(em))
+    if email_breaches:
+        result["email_breaches"] = list(dict.fromkeys(email_breaches))
+        result["sources_used"].append("hibp_email")
+
     if meta:
         result["carrier"] = meta.get("carrier") or result["carrier"]
         result["line_type"] = meta.get("line_type")
@@ -322,7 +404,9 @@ async def multi_source_lookup(phone_number: str) -> dict:
         if breaches is not None:
             result["sources_used"].append("hibp")
 
-    connections, graph = await _a_build_relationship_map(phone_number, result["accounts"], result["breaches"])
+    connections, graph = await _a_build_relationship_map(
+        phone_number, result["accounts"], result["breaches"], result["emails"]
+    )
     result["connections"] = connections
     result["graph"] = graph
 
@@ -369,6 +453,8 @@ def enrich_phone_data(phone_number: str) -> dict:
         "line_type": data.get("line_type"),
         "name": data.get("name"),
         "social_profiles": data.get("accounts", []),
+        "emails": data.get("emails", []),
+        "email_breaches": data.get("email_breaches", []),
         "breaches": data.get("breaches", []),
         "connections": data.get("connections", []),
         "confidence_score": _calculate_confidence(data),
@@ -398,6 +484,8 @@ async def a_enrich_phone_data(phone_number: str) -> dict:
         "line_type": data.get("line_type"),
         "name": data.get("name"),
         "social_profiles": data.get("accounts", []),
+        "emails": data.get("emails", []),
+        "email_breaches": data.get("email_breaches", []),
         "breaches": data.get("breaches", []),
         "connections": data.get("connections", []),
         "confidence_score": _calculate_confidence(data),

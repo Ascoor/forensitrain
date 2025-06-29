@@ -15,6 +15,8 @@ class PhoneData(BaseModel):
     name: Optional[str] = None
     accounts: List[str] = []
     breaches: List[str] = []
+    emails: List[str] = []
+    email_breaches: List[str] = []
     connections: List[dict] = []
     graph: Optional[dict] = None
     sources_used: List[str] = []
@@ -35,6 +37,8 @@ class EnrichedPhoneData(BaseModel):
     line_type: Optional[str] = None
     name: Optional[str] = None
     social_profiles: List[str] = []
+    emails: List[str] = []
+    email_breaches: List[str] = []
     breaches: List[str] = []
     connections: List[dict] = []
     confidence_score: float
