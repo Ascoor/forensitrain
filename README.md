@@ -31,6 +31,7 @@
 cd backend
 python -m venv venv
 source venv/bin/activate
+# تتضمن المتطلبات حزمة opencv-python-headless لتحليل الصور
 pip install -r requirements.txt
 # عدل ملف backend/.env وأضف مفاتيحك هنا
 uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
@@ -40,6 +41,7 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 # 2. تشغيل الواجهة الأمامية
 cd frontend
 npm install
+# سيقوم هذا بتثبيت حزم React الإضافية مثل react-router-dom و react-icons
 # عدل ملف frontend/.env إذا لزم
 npm run dev
 ```
