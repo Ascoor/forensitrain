@@ -15,4 +15,5 @@ piexif
 Pillow
 numpy
 opencv-python-headless
+email-validator
 

@@ -14,6 +14,7 @@ class PhoneData(BaseModel):
     line_type: Optional[str] = None
     name: Optional[str] = None
     accounts: List[str] = []
+    profiles: List[Dict[str, Optional[str]]] = []
     breaches: List[str] = []
     emails: List[str] = []
     email_breaches: List[str] = []
@@ -37,6 +38,7 @@ class EnrichedPhoneData(BaseModel):
     line_type: Optional[str] = None
     name: Optional[str] = None
     social_profiles: List[str] = []
+    profile_details: List[Dict[str, Optional[str]]] = []
     emails: List[str] = []
     email_breaches: List[str] = []
     breaches: List[str] = []
