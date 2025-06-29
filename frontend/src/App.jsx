@@ -7,6 +7,7 @@ import PhoneInput from './components/PhoneInput';
 import ResultCard from './components/ResultCard';
 import GraphView from './components/GraphView';
 import ExportPage from './components/ExportPage';
+import ImageAnalysis from './components/ImageAnalysis';
 import { analyzePhone } from './services/api';
 
 function LookupPage({ onSearch, loading, error, result }) {
@@ -61,11 +62,13 @@ function App() {
           <nav className="mb-4 flex gap-4">
             <Link to="/">{t('general')}</Link>
             <Link to="/graph">Graph</Link>
+            <Link to="/image">{t('image_analysis')}</Link>
             {result && <Link to="/export">{t('export')}</Link>}
           </nav>
           <Routes>
             <Route path="/" element={<LookupPage onSearch={handleSearch} loading={loading} error={error} result={result} />} />
             <Route path="/graph" element={<GraphPage result={result} />} />
+            <Route path="/image" element={<ImageAnalysis />} />
             <Route path="/export" element={<ExportPage phone={result?.phone_number} />} />
           </Routes>
           <p className="text-xs mt-4">{t('legal')}</p>

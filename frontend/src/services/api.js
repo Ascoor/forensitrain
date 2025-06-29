@@ -32,3 +32,20 @@ export const exportReport = async (phoneNumber, fmt = 'json') => {
   }
   return await res.json()
 }
+
+export const analyzeImage = async (file) => {
+  const form = new FormData()
+  form.append('file', file)
+  const res = await fetch(`${API_BASE}/analyze-image`, {
+    method: 'POST',
+    body: form
+  })
+  if (!res.ok) {
+    throw new Error('Request failed')
+  }
+  const data = await res.json()
+  if (data.status !== 'success') {
+    throw new Error(data.errors || 'Request failed')
+  }
+  return data.data
+}

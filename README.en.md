@@ -13,6 +13,7 @@ potential social media profiles and known breach exposure.
 - Optional Sherlock lookup for more profiles
 - Breach checks using public `scylla.sh` and `dehashed` datasets
 - Export reports as JSON or PDF
+- Image intelligence with face, text and object detection
 - Bilingual UI with dark mode
 - Unified enrichment endpoint returning a confidence score
 

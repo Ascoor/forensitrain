@@ -8,5 +8,13 @@
   "accounts": "الحسابات الاجتماعية",
   "breaches": "سجل الاختراقات",
   "emails": "البريد الإلكتروني",
-  "export": "تصدير"
+  "export": "تصدير",
+  "image_analysis": "تحليل الصورة",
+  "upload_image": "رفع صورة",
+  "scan": "تحليل",
+  "image_info": "معلومات الصورة",
+  "detected_faces": "الوجوه المكتشفة",
+  "extracted_text": "النص المستخرج",
+  "scene_elements": "عناصر المشهد",
+  "inferred_clues": "استنتاجات"
 }

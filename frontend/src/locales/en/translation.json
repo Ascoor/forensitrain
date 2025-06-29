@@ -8,5 +8,13 @@
   "accounts": "Social Accounts",
   "breaches": "Breach History",
   "emails": "Emails",
-  "export": "Export"
+  "export": "Export",
+  "image_analysis": "Image Analysis",
+  "upload_image": "Upload Image",
+  "scan": "Analyze",
+  "image_info": "Image Info",
+  "detected_faces": "Detected Faces",
+  "extracted_text": "Extracted Text",
+  "scene_elements": "Scene Elements",
+  "inferred_clues": "Inferred Clues"
 }
