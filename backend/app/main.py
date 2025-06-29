@@ -18,7 +18,7 @@ app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
 # Allow frontend development origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000", "*"],
+    allow_origins=["http://localhost:7000", "http://localhost:3000", "*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -31,9 +31,9 @@ def index() -> HTMLResponse:
     html = (
         "<html><body>"
         "<h1>ForensiTrain API</h1>"
-        "<p>The React frontend runs separately on port 5173. "
+        "<p>The React frontend runs separately on port 7000. "
         "Start it with <code>npm run dev</code> and open "
-        "<a href='http://localhost:5173'>http://localhost:5173</a>." 
+        "<a href='http://localhost:7000'>http://localhost:7000</a>." 
         "</p>"
         "</body></html>"
     )
