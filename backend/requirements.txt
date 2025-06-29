@@ -11,3 +11,4 @@ cvlib
 pytesseract
 piexif
 Pillow
+numpy
