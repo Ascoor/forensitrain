@@ -18,7 +18,8 @@
 
 ## ⚙️ المتطلبات البرمجية
 
-- Python 3.10 أو أحدث.
+- Python 3.10 أو أحدث (ويفضَّل 3.11 لأن مكتبة `dlib` لا توفر بعد عجلات
+  جاهزة للإصدار 3.12 مما يؤدي إلى بطء كبير أثناء التثبيت).
 - Node.js 18 أو أحدث.
 - الحزم الموجودة في `backend/requirements.txt` و`frontend/package.json`.
 - تثبيت أداة Maigret بشكل مستقل.
@@ -29,7 +30,7 @@
 ```bash
 # 1. تشغيل الخادم الخلفي
 cd backend
-python -m venv venv
+python3.11 -m venv venv
 source venv/bin/activate
 # تتضمن المتطلبات حزمة opencv-python-headless لتحليل الصور
 pip install -r requirements.txt
