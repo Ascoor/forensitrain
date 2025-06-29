@@ -5,13 +5,13 @@ numbers. It uses public APIs and command line tools such as Maigret to collect
 metadata about a target number. Results include country, carrier information,
 potential social media profiles and known breach exposure.
 
-## Key Features
+-## Key Features
 
 - Phone number parsing with `phonenumbers`
-- Carrier and line type lookup via NumVerify
+- Carrier and line type lookup using only `phonenumbers`
 - Social profile discovery using Maigret
 - Optional Sherlock lookup for more profiles
-- Breach checks through HaveIBeenPwned
+- Breach checks using public `scylla.sh` and `dehashed` datasets
 - Export reports as JSON or PDF
 - Bilingual UI with dark mode
 - Unified enrichment endpoint returning a confidence score
@@ -40,8 +40,7 @@ actual user interface runs at `http://localhost:5173` when launched via
    ```bash
    pip install -r requirements.txt
    ```
-3. Edit `backend/.env` and add your API keys.
-4. Start the API:
+3. Start the API:
    ```bash
    uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
    ```
@@ -89,8 +88,7 @@ dependencies, and launches the API and React frontend concurrently.
 
 ## Docker Deployment
 
-1. Edit the provided `backend/.env` file with your API keys.
-2. Build and start the stack:
+1. Build and start the stack:
    ```bash
    docker-compose up --build
    ```
