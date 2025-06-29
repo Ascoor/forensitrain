@@ -11,6 +11,7 @@ potential social media profiles and known breach exposure.
 - Carrier and line type lookup using only `phonenumbers`
 - Social profile discovery using Maigret
 - Optional Sherlock lookup for more profiles
+- Recursive intelligence lookups that reuse discovered emails and usernames
 - Breach checks using public `scylla.sh` and `dehashed` datasets
 - Export reports as JSON or PDF
 - Bilingual UI with dark mode
