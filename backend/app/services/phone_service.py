@@ -8,17 +8,12 @@ import time
 
 import logging
 
-from dotenv import load_dotenv
+from .phone_meta_service import parse_phone
+from .social_service import run_maigret, run_sherlock
+from .email_guess_service import guess_emails
+from .breach_service import scylla_lookup, dehashed_lookup
+from .relationship_service import build_relationship_map
 
-import phonenumbers
-from phonenumbers import carrier, geocoder
-import requests
-
-load_dotenv()
-
-
-HIBP_API_KEY = os.getenv("HIBP_API_KEY")
-NUMVERIFY_API_KEY = os.getenv("NUMVERIFY_API_KEY")
 
 # simple in-memory cache {phone_number: response_dict}
 CACHE: Dict[str, dict] = {}
@@ -44,63 +39,22 @@ rel_logger.addHandler(rel_handler)
 rel_logger.setLevel(logging.INFO)
 
 
-def _query_numverify(number: str) -> Dict:
-    """Query numverify API for enriched phone metadata."""
-    if not NUMVERIFY_API_KEY:
-        return {}
-    url = f"http://apilayer.net/api/validate?access_key={NUMVERIFY_API_KEY}&number={number}"
-    try:
-        resp = requests.get(url, timeout=10)
-        if resp.status_code == 200:
-            return resp.json()
-    except Exception:
-        pass
-    return {}
+
 
 
 def _query_maigret(number: str) -> List[str]:
-    """Run Maigret CLI to find social profiles for the phone number."""
-    profiles: List[str] = []
-    output_path = os.path.join(LOG_DIR, f"maigret_{number}.json")
-    cmd = ["maigret", number, "--json", "--top-sites", "-o", output_path]
-    try:
-        subprocess.run(cmd, capture_output=True, text=True, timeout=60, check=False)
-        if os.path.exists(output_path):
-            with open(output_path) as f:
-                data = json.load(f)
-            for site in data.get("sites", []):
-                url = site.get("url")
-                if url:
-                    profiles.append(url)
-            os.remove(output_path)
-    except Exception:
-        pass
-    return profiles
+    return [a["profile"] for a in run_maigret(number)]
 
 
 def _query_sherlock(number: str) -> List[str]:
-    """Stub for Sherlock search by phone, returns empty list."""
-    # Real implementation would invoke the Sherlock tool
-    return []
+    return [a["profile"] for a in run_sherlock(number)]
 
 
 def _query_hibp(number: str) -> List[str]:
-    """Check HaveIBeenPwned for breach exposure."""
-    if not HIBP_API_KEY:
-        return []
-    url = f"https://haveibeenpwned.com/api/v3/breachedaccount/{number}"
-    headers = {"hibp-api-key": HIBP_API_KEY, "user-agent": "ForensiTrain"}
-    try:
-        resp = requests.get(url, headers=headers, timeout=10)
-        if resp.status_code == 200:
-            return [b.get("Name") for b in resp.json()]
-    except Exception:
-        pass
-    return []
-
-
-async def _a_query_numverify(number: str) -> Dict:
-    return await asyncio.to_thread(_query_numverify, number)
+    breaches = scylla_lookup(number, "phone")
+    if not breaches:
+        breaches = dehashed_lookup(number)
+    return breaches
 
 
 async def _a_query_maigret(number: str) -> List[str]:
@@ -136,20 +90,7 @@ async def _a_lookup_emails(number: str) -> List[str]:
 
 
 def _query_email_hibp(email: str) -> List[str]:
-    """Check HIBP for breaches related to an email address."""
-    if not HIBP_API_KEY:
-        return []
-    url = (
-        f"https://haveibeenpwned.com/api/v3/breachedaccount/{email}?truncateResponse=true"
-    )
-    headers = {"hibp-api-key": HIBP_API_KEY, "user-agent": "ForensiTrain"}
-    try:
-        resp = requests.get(url, headers=headers, timeout=10)
-        if resp.status_code == 200:
-            return [b.get("Name") for b in resp.json()]
-    except Exception:
-        pass
-    return []
+    return scylla_lookup(email, "email") or dehashed_lookup(email)
 
 
 async def _a_query_email_hibp(email: str) -> List[str]:
@@ -168,79 +109,6 @@ def _log_source_time(phone: str, source: str, duration: float) -> None:
     logging.info("%s\t%s_time\t%.2f", phone, source, duration)
 
 
-def build_relationship_map(
-    number: str, accounts: List[str], breaches: List[str], emails: Optional[List[str]] = None
-) -> (List[Dict], Dict):
-    """Create relationship mapping for a phone number based on mock data."""
-    relationships: List[Dict] = []
-    nodes: List[Dict] = [{"id": number, "label": number}]
-    edges: List[Dict] = []
-
-    data_path = os.path.abspath(
-        os.path.join(os.path.dirname(__file__), "../data/mock_data.json")
-    )
-    try:
-        with open(data_path) as f:
-            dataset = json.load(f)
-    except Exception:
-        dataset = []
-
-    entry_map = {e.get("phone_number"): e for e in dataset}
-    email_map = {e.get("phone_number"): e.get("email") for e in dataset if e.get("email")}
-
-    def add_relation(target: str, name: Optional[str], rel: str, source: str) -> None:
-        data = {
-            "phone_number": target,
-            "name": name,
-            "relationship": rel,
-            "source": source,
-        }
-        if data not in relationships:
-            relationships.append(data)
-            nodes.append({"id": target, "label": name or target})
-            edges.append({"from": number, "to": target, "label": rel})
-            rel_logger.info("%s\t%s\t%s\t%s", number, target, rel, source)
-
-    # direct connections from dataset
-    if number in entry_map:
-        entry = entry_map[number]
-        email = entry.get("email")
-        if email:
-            if not any(n.get("id") == email for n in nodes):
-                nodes.append({"id": email, "label": email})
-            edges.append({"from": number, "to": email, "label": "email"})
-            relationships.append(
-                {
-                    "email": email,
-                    "relationship": "associated email",
-                    "source": "mock dataset",
-                }
-            )
-            rel_logger.info("%s\t%s\t%s\t%s", number, email, "email", "mock dataset")
-            for pn, em in email_map.items():
-                if em == email and pn != number:
-                    add_relation(pn, entry_map.get(pn, {}).get("name"), "shared email", "mock dataset")
-                    edges.append({"from": email, "to": pn, "label": "shared email"})
-        for conn in entry.get("connections", []):
-            target = entry_map.get(conn)
-            add_relation(
-                conn,
-                target.get("name") if target else None,
-                "known connection",
-                "mock dataset",
-            )
-
-    # connections pointing back to this number or shared data
-    for pn, entry in entry_map.items():
-        if pn == number:
-            continue
-        if number in entry.get("connections", []):
-            add_relation(pn, entry.get("name"), "linked connection", "mock dataset")
-        if set(accounts) & set(entry.get("accounts", [])):
-            add_relation(pn, entry.get("name"), "shared social account", "mock dataset")
-
-    graph = {"nodes": nodes, "edges": edges}
-    return relationships, graph
 
 
 async def _a_build_relationship_map(
@@ -268,12 +136,12 @@ def analyze_phone(phone_number: str) -> dict:
         "graph": {},
     }
 
-    try:
-        parsed = phonenumbers.parse(phone_number, None)
-        result["valid"] = phonenumbers.is_valid_number(parsed)
-        result["country"] = geocoder.description_for_number(parsed, "en")
-        result["carrier"] = carrier.name_for_number(parsed, "en")
-    except phonenumbers.NumberParseException:
+    meta = parse_phone(phone_number)
+    result["valid"] = meta.get("valid")
+    result["country"] = meta.get("country")
+    result["carrier"] = meta.get("carrier")
+    result["line_type"] = meta.get("line_type")
+    if not result["valid"]:
         resp = {
             "status": "error",
             "data": None,
@@ -284,18 +152,12 @@ def analyze_phone(phone_number: str) -> dict:
         return resp
 
     try:
-        meta = _query_numverify(phone_number)
-        if meta:
-            result["carrier"] = meta.get("carrier") or result["carrier"]
-            result["line_type"] = meta.get("line_type")
-            result["name"] = meta.get("location")
-
         result["accounts"] = _query_maigret(phone_number)
         result["breaches"] = _query_hibp(phone_number)
         result["emails"] = _lookup_emails(phone_number)
         email_breaches = []
         for em in result["emails"]:
-            email_breaches.extend(_query_email_hibp(em))
+            email_breaches.extend(_breach_lookup(em))
         result["email_breaches"] = list(dict.fromkeys(email_breaches))
         result["connections"], result["graph"] = build_relationship_map(
             phone_number,
@@ -349,13 +211,13 @@ async def multi_source_lookup(phone_number: str) -> dict:
     timings: Dict[str, float] = {}
 
     # parse phone number first
-    try:
-        parsed = phonenumbers.parse(phone_number, None)
-        result["valid"] = phonenumbers.is_valid_number(parsed)
-        result["country"] = geocoder.description_for_number(parsed, "en")
-        result["carrier"] = carrier.name_for_number(parsed, "en")
-        result["sources_used"].append("phonenumbers")
-    except phonenumbers.NumberParseException:
+    meta = parse_phone(phone_number)
+    result["valid"] = meta.get("valid")
+    result["country"] = meta.get("country")
+    result["carrier"] = meta.get("carrier")
+    result["line_type"] = meta.get("line_type")
+    result["sources_used"].append("phonenumbers")
+    if not result["valid"]:
         resp = {
             "status": "error",
             "data": None,
@@ -379,14 +241,13 @@ async def multi_source_lookup(phone_number: str) -> dict:
             return None
 
     tasks = {
-        "numverify": asyncio.create_task(run_source("numverify", _a_query_numverify(phone_number))),
         "maigret": asyncio.create_task(run_source("maigret", _a_query_maigret(phone_number))),
         "sherlock": asyncio.create_task(run_source("sherlock", _a_query_sherlock(phone_number))),
         "hibp": asyncio.create_task(run_source("hibp", _a_query_hibp(phone_number))),
     }
 
     results = await asyncio.gather(*tasks.values())
-    meta, maigret_accounts, sherlock_accounts, breaches = results
+    maigret_accounts, sherlock_accounts, breaches = results
 
     accounts = list(dict.fromkeys((maigret_accounts or []) + (sherlock_accounts or [])))
 
@@ -401,11 +262,6 @@ async def multi_source_lookup(phone_number: str) -> dict:
         result["email_breaches"] = list(dict.fromkeys(email_breaches))
         result["sources_used"].append("hibp_email")
 
-    if meta:
-        result["carrier"] = meta.get("carrier") or result["carrier"]
-        result["line_type"] = meta.get("line_type")
-        result["name"] = meta.get("location")
-        result["sources_used"].append("numverify")
 
     if accounts is not None:
         result["accounts"] = accounts
