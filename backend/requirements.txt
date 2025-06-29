@@ -14,3 +14,5 @@ pytesseract
 piexif
 Pillow
 numpy
+opencv-python-headless
+

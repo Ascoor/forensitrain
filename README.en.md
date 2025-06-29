@@ -38,7 +38,7 @@ actual user interface runs at `http://localhost:5173` when launched via
    python -m venv venv
    source venv/bin/activate  # on Windows use venv\Scripts\activate
    ```
-2. Install dependencies:
+2. Install dependencies (includes `opencv-python-headless` for image analysis):
    ```bash
    pip install -r requirements.txt
    ```
@@ -56,7 +56,7 @@ actual user interface runs at `http://localhost:5173` when launched via
 1. In a new terminal run:
    ```bash
    cd frontend
-   npm install
+   npm install  # installs react-router-dom and react-icons
    npm run dev
    ```
 
