@@ -13,6 +13,7 @@ potential social media profiles and known breach exposure.
 - Optional Sherlock lookup for more profiles
 - Recursive intelligence lookups that reuse discovered emails and usernames
 - Breach checks using public `scylla.sh` and `dehashed` datasets
+- Social account scraping with avatar extraction
 - Export reports as JSON or PDF
 - Image intelligence with face, text and object detection
 - Bilingual UI with dark mode
