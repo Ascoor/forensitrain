@@ -10,7 +10,7 @@ const platformIcon = (url) => {
 
 const ResultCard = ({ data }) => {
   const [tab, setTab] = useState('general')
-  const tabs = ['general', 'accounts', 'breaches']
+  const tabs = ['general', 'accounts', 'breaches', 'emails']
 
   return (
     <div className="border p-4 rounded shadow">
@@ -24,6 +24,7 @@ const ResultCard = ({ data }) => {
             {t === 'general' && 'General Info'}
             {t === 'accounts' && 'Social Accounts'}
             {t === 'breaches' && 'Breach History'}
+            {t === 'emails' && 'Emails'}
           </button>
         ))}
       </div>
@@ -84,6 +85,30 @@ const ResultCard = ({ data }) => {
             </ul>
           ) : (
             <p>No breaches found.</p>
+          )}
+        </div>
+      )}
+
+      {tab === 'emails' && (
+        <div>
+          {data.emails && data.emails.length > 0 ? (
+            <ul className="list-disc list-inside">
+              {data.emails.map((e, i) => (
+                <li key={i}>{e}</li>
+              ))}
+            </ul>
+          ) : (
+            <p>No emails found.</p>
+          )}
+          {data.email_breaches && data.email_breaches.length > 0 && (
+            <div className="mt-2">
+              <p className="font-semibold">Email Breaches:</p>
+              <ul className="list-disc list-inside">
+                {data.email_breaches.map((b, i) => (
+                  <li key={i}>{b}</li>
+                ))}
+              </ul>
+            </div>
           )}
         </div>
       )}
