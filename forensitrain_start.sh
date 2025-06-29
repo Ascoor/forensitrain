@@ -4,24 +4,13 @@ set -e
 
 echo "🚀 Starting ForensiTrain..."
 
-<<<<<<< HEAD
 # Check prerequisites
-if command -v python3.11 >/dev/null 2>&1; then
-    PYTHON_BIN=$(command -v python3.11)
-elif command -v python3 >/dev/null 2>&1; then
-    PYTHON_BIN=$(command -v python3)
-elif command -v python >/dev/null 2>&1; then
-    PYTHON_BIN=$(command -v python)
-else
+PYTHON_BIN=$(command -v python3.11 || command -v python3 || command -v python)
+if [ -z "$PYTHON_BIN" ]; then
     echo "Python is not installed" >&2
     exit 1
 fi
-command -v npm >/dev/null 2>&1 || { echo "npm is not installed" >&2; exit 1; }
-=======
-# التحقق من وجود المتطلبات الأساسية
-command -v python3 >/dev/null 2>&1 || { echo "❌ Python 3 is not installed"; exit 1; }
 command -v npm >/dev/null 2>&1 || { echo "❌ npm is not installed"; exit 1; }
->>>>>>> 09b9504 (update)
 
 SCRIPT_DIR=$(cd "$(dirname "$0")" && pwd)
 
@@ -30,12 +19,8 @@ cd "$SCRIPT_DIR/backend"
 
 # إنشاء البيئة الافتراضية إذا لم تكن موجودة
 if [ ! -d "venv" ]; then
-<<<<<<< HEAD
-    "$PYTHON_BIN" -m venv venv
-=======
     echo "📦 Creating virtual environment..."
-    python3 -m venv venv
->>>>>>> 09b9504 (update)
+    "$PYTHON_BIN" -m venv venv
 fi
 
 # تفعيل البيئة الافتراضية

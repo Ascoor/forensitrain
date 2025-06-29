@@ -81,6 +81,12 @@ To automatically set up both services run:
 ./forensitrain_start.sh
 ```
 
+If you encounter an `ERR_CONNECTION_REFUSED` message, run the diagnostic script:
+
+```bash
+./check_backend.sh
+```
+
 The script creates the backend virtual environment if needed, installs
 dependencies, and launches the API and React frontend concurrently.
 
