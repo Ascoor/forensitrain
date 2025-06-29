@@ -54,7 +54,7 @@ if [ ! -d "node_modules" ]; then
     npm install
 fi
 
-echo "🚀 Starting frontend on http://localhost:7000 ..."
+echo "🚀 Starting frontend on http://localhost:5173 ..."
 npm run dev &
 FRONTEND_PID=$!
 cd "$SCRIPT_DIR"
@@ -64,4 +64,4 @@ trap 'echo -e "\n🛑 Stopping services..."; kill $BACKEND_PID $FRONTEND_PID; ex
 
 wait $BACKEND_PID $FRONTEND_PID
 echo "✅ ForensiTrain is running successfully!"
-echo "🌐 Access the frontend at http://localhost:7000"
+echo "🌐 Access the frontend at http://localhost:5173"
