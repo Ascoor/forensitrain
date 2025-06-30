@@ -47,8 +47,8 @@ function App() {
   return (
     <BrowserRouter>
       <div className={theme === 'dark' ? 'dark' : ''}>
-        <div className="p-4 max-w-3xl mx-auto text-gray-900 dark:bg-gray-800 dark:text-gray-100 min-h-screen">
-          <Navbar toggleTheme={toggleTheme} theme={theme} />
+       <div className="w-full max-w-full mx-auto text-gray-900 dark:bg-gray-800 dark:text-gray-100 min-h-screen">
+    <Navbar toggleTheme={toggleTheme} theme={theme} />
           <nav className="mb-4 flex gap-4">
             <Link to="/dashboard">Dashboard</Link>
             <Link to="/">{t('general')}</Link>
