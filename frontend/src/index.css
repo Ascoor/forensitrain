@@ -18,3 +18,28 @@ body,
 .animate-fade-in {
   animation: fade-in 0.5s ease-in;
 }
+
+/* Cockpit UI custom styles */
+@keyframes radar-sweep {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.radar {
+  background: radial-gradient(circle at center, rgba(16,185,129,0.4) 0%, rgba(0,0,0,0.8) 70%);
+}
+
+.radar-sweep {
+  background: linear-gradient(90deg, rgba(16,185,129,0.4), transparent);
+  animation: radar-sweep 4s linear infinite;
+  transform-origin: 50% 50%;
+}
+
+@keyframes monitor-flicker {
+  0%, 100% { opacity: 0.95; }
+  50% { opacity: 1; }
+}
+
+.flicker {
+  animation: monitor-flicker 0.2s infinite;
+}
