@@ -45,6 +45,8 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 cd frontend
 npm install
 # سيقوم هذا بتثبيت حزم React الإضافية مثل react-router-dom و react-icons
+# إذا ظهرت رسالة خطأ مثل "Failed to resolve import 'recharts'" تأكد من إعادة تشغيل
+# هذا الأمر لتثبيت الحزم الجديدة بعد تحديث package.json
 # عدل ملف frontend/.env إذا لزم
 npm run dev
 ```
