@@ -3,24 +3,11 @@ import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import './i18n';
 import Navbar from './components/Navbar';
-import PhoneInput from './components/PhoneInput';
-import ResultCard from './components/ResultCard';
+import PhoneLookupPage from './pages/PhoneLookupPage';
 import GraphView from './components/GraphView';
 import ExportPage from './components/ExportPage';
 import ImageAnalysis from './components/ImageAnalysis';
-import { analyzePhone } from './services/api';
-
-function LookupPage({ onSearch, loading, error, result }) {
-  const { t } = useTranslation();
-  return (
-    <div>
-      <PhoneInput onSearch={onSearch} />
-      {loading && <p className="mb-2">{t('loading')}</p>}
-      {error && <p className="text-red-600 mb-2">{error}</p>}
-      {result && <ResultCard data={result} />}
-    </div>
-  );
-}
+import { enrichPhone } from './services/api';
 
 function GraphPage({ result }) {
   if (!result) return null;
@@ -43,7 +30,7 @@ function App() {
       setError(null);
       setResult(null);
       setLoading(true);
-      const data = await analyzePhone(phone);
+      const data = await enrichPhone(phone);
       setResult(data);
     } catch (err) {
       console.error(err);
@@ -66,7 +53,17 @@ function App() {
             {result && <Link to="/export">{t('export')}</Link>}
           </nav>
           <Routes>
-            <Route path="/" element={<LookupPage onSearch={handleSearch} loading={loading} error={error} result={result} />} />
+            <Route
+              path="/"
+              element={
+                <PhoneLookupPage
+                  onSearch={handleSearch}
+                  loading={loading}
+                  error={error}
+                  result={result}
+                />
+              }
+            />
             <Route path="/graph" element={<GraphPage result={result} />} />
             <Route path="/image" element={<ImageAnalysis />} />
             <Route path="/export" element={<ExportPage phone={result?.phone_number} />} />

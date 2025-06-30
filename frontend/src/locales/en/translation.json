@@ -2,6 +2,7 @@
   "title": "ForensiTrain",
   "search_placeholder": "e.g. +12024561111",
   "search": "Search",
+  "invalid_phone": "Invalid phone number",
   "loading": "Loading...",
   "legal": "For legal and educational OSINT use only.",
   "general": "General Info",
