@@ -2,6 +2,7 @@
   "title": "فرنسي ترين",
   "search_placeholder": "مثال: +201234567890",
   "search": "بحث",
+  "invalid_phone": "رقم هاتف غير صالح",
   "loading": "جاري التحميل...",
   "legal": "هذه الأداة للاستخدام القانوني والتعليمي في OSINT فقط.",
   "general": "معلومات عامة",
@@ -16,5 +17,6 @@
   "detected_faces": "الوجوه المكتشفة",
   "extracted_text": "النص المستخرج",
   "scene_elements": "عناصر المشهد",
-  "inferred_clues": "استنتاجات"
+  "inferred_clues": "استنتاجات",
+  "graph": "مخطط العلاقات"
 }

@@ -17,6 +17,22 @@ export const analyzePhone = async (phoneNumber) => {
   return data.data
 }
 
+export const enrichPhone = async (phoneNumber) => {
+  const res = await fetch(`${API_BASE}/phone/enrich`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ phone_number: phoneNumber })
+  })
+  if (!res.ok) {
+    throw new Error('Request failed')
+  }
+  const data = await res.json()
+  if (data.status !== 'success') {
+    throw new Error(data.errors || 'Request failed')
+  }
+  return data.data
+}
+
 export const exportReport = async (phoneNumber, fmt = 'json') => {
   const res = await fetch(`${API_BASE}/phone/export?fmt=${fmt}`, {
     method: 'POST',
