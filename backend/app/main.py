@@ -9,6 +9,7 @@ import importlib
 from .routers.phone import router as phone_router, limiter, rate_limit_handler
 from .routers.image import router as image_router
 from .routers.social import router as social_router
+from .routers.integration import router as integration_router
 
 
 load_dotenv()
@@ -28,6 +29,7 @@ def _check_dependencies():
             status[name] = f"error: {exc}"
     try:  # GPU check
         import tensorflow as tf
+
         gpu = tf.config.list_physical_devices("GPU")
         if not gpu:
             gpu = tf.config.list_physical_devices("XLA_GPU")
@@ -42,6 +44,7 @@ def _check_dependencies():
         pass
     return status
 
+
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
 
@@ -50,6 +53,7 @@ app.add_exception_handler(RateLimitExceeded, rate_limit_handler)
 async def startup_event() -> None:
     """Check heavy dependencies once at startup."""
     app.state.dependencies = _check_dependencies()
+
 
 # Allow frontend development origins
 app.add_middleware(
@@ -61,7 +65,6 @@ app.add_middleware(
 )
 
 
-
 @app.get("/", include_in_schema=False)
 def index() -> HTMLResponse:
     """Simple landing page explaining how to access the frontend."""
@@ -70,11 +73,12 @@ def index() -> HTMLResponse:
         "<h1>ForensiTrain API</h1>"
         "<p>The React frontend runs separately on port 7000. "
         "Start it with <code>npm run dev</code> and open "
-        "<a href='http://localhost:7000'>http://localhost:7000</a>." 
+        "<a href='http://localhost:7000'>http://localhost:7000</a>."
         "</p>"
         "</body></html>"
     )
     return HTMLResponse(content=html)
+
 
 @app.get("/api/health")
 def health_check():
@@ -82,7 +86,9 @@ def health_check():
     deps = getattr(app.state, "dependencies", {})
     return {"status": "ok", "dependencies": deps}
 
+
 # Include phone analysis routes
 app.include_router(phone_router, prefix="/api/phone")
 app.include_router(image_router, prefix="/api")
 app.include_router(social_router, prefix="/api/social")
+app.include_router(integration_router, prefix="/api")
