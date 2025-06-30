@@ -18,5 +18,7 @@
   "extracted_text": "Extracted Text",
   "scene_elements": "Scene Elements",
   "inferred_clues": "Inferred Clues",
-  "graph": "Graph"
+  "graph": "Graph",
+  "invalid_image": "Unsupported image type. Upload JPG or PNG.",
+  "file_too_large": "File too large (max 5MB)"
 }

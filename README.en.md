@@ -122,3 +122,18 @@ const sample = {
 When integrating with the API, pass `result.graph` from `enrichPhone` directly
 into the component. It handles loading and error states automatically.
 
+## Image Analysis
+
+The `ImageAnalysis` component lets users upload an image (JPG/PNG) and submit it
+to `/api/analyze-image` for processing. A preview fades in after selection and a
+spinner is shown during the request.
+
+```jsx
+import ImageAnalysis from './components/ImageAnalysis'
+
+<ImageAnalysis />
+```
+
+Results include detected faces, extracted text and scene objects. Navigation in
+`App.jsx` already links to `/image` so the feature is available out of the box.
+
