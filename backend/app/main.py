@@ -6,9 +6,9 @@ from slowapi.errors import RateLimitExceeded
 import importlib
 
 
-from .routes.phone import router as phone_router, limiter, rate_limit_handler
-from .routes.image import router as image_router
-from .routes.social import router as social_router
+from .routers.phone import router as phone_router, limiter, rate_limit_handler
+from .routers.image import router as image_router
+from .routers.social import router as social_router
 
 load_dotenv()
 
