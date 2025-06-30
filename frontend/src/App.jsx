@@ -7,6 +7,7 @@ import PhoneLookupPage from './pages/PhoneLookupPage';
 import GraphView from './components/GraphView';
 import ExportPage from './components/ExportPage';
 import ImageAnalysis from './components/ImageAnalysis';
+import DashboardPage from './pages/DashboardPage';
 import { enrichPhone } from './services/api';
 
  
@@ -49,6 +50,7 @@ function App() {
         <div className="p-4 max-w-3xl mx-auto text-gray-900 dark:bg-gray-800 dark:text-gray-100 min-h-screen">
           <Navbar toggleTheme={toggleTheme} theme={theme} />
           <nav className="mb-4 flex gap-4">
+            <Link to="/dashboard">Dashboard</Link>
             <Link to="/">{t('general')}</Link>
             <Link to="/graph">{t('graph')}</Link>
             <Link to="/image">{t('image_analysis')}</Link>
@@ -72,7 +74,9 @@ function App() {
                 <GraphPage result={result} loading={loading} error={error} />
               }
             />
- 
+
+            <Route path="/dashboard" element={<DashboardPage />} />
+
             <Route path="/image" element={<ImageAnalysis />} />
             <Route path="/export" element={<ExportPage phone={result?.phone_number} />} />
           </Routes>
