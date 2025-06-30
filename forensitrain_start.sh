@@ -64,6 +64,7 @@ cd "$SCRIPT_DIR/frontend"
 if [ ! -d "node_modules" ]; then
   echo "📦 Installing frontend packages..."
   npm install
+  npm update
 fi
 
 echo "🚀 Starting frontend at http://localhost:7000 ..."
