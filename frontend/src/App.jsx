@@ -9,8 +9,11 @@ import ExportPage from './components/ExportPage';
 import ImageAnalysis from './components/ImageAnalysis';
 import { enrichPhone } from './services/api';
 
-function GraphPage({ result, loading, error }) {
-  return <GraphView graph={result?.graph} loading={loading} error={error} />;
+ 
+function GraphPage({ result }) {
+  if (!result) return null;
+  return <GraphView graph={result.graph} />;
+ 
 }
 
 function App() {
@@ -69,6 +72,7 @@ function App() {
                 <GraphPage result={result} loading={loading} error={error} />
               }
             />
+ 
             <Route path="/image" element={<ImageAnalysis />} />
             <Route path="/export" element={<ExportPage phone={result?.phone_number} />} />
           </Routes>
