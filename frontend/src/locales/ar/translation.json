@@ -17,5 +17,8 @@
   "detected_faces": "الوجوه المكتشفة",
   "extracted_text": "النص المستخرج",
   "scene_elements": "عناصر المشهد",
-  "inferred_clues": "استنتاجات"
+  "inferred_clues": "استنتاجات",
+  "graph": "مخطط العلاقات",
+  "invalid_image": "نوع صورة غير مدعوم. الرجاء تحميل JPG أو PNG.",
+  "file_too_large": "الملف كبير جداً (الحد 5 ميجابايت)"
 }

@@ -1,6 +1,8 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import PhoneInput from '../components/PhoneInput'
+import PhoneInput from '../components/PhoneInput' 
+import GraphView from '../components/GraphView'
+ 
 
 /**
  * PhoneLookupPage renders the phone search form and results.
@@ -10,9 +12,9 @@ import PhoneInput from '../components/PhoneInput'
 const PhoneLookupPage = ({ onSearch, loading, error, result }) => {
   const { t } = useTranslation()
   const [tab, setTab] = useState('general')
-
+ 
   const tabs = ['general', 'accounts', 'breaches', 'emails']
-
+ 
   return (
     <div>
       <PhoneInput onSearch={onSearch} />
@@ -92,7 +94,14 @@ const PhoneLookupPage = ({ onSearch, loading, error, result }) => {
                 <p>No emails found.</p>
               )}
             </div>
+          )} 
+
+          {tab === 'graph' && (
+            <div className="mt-2">
+              <GraphView graph={result.graph} />
+            </div>
           )}
+ 
         </div>
       )}
     </div>

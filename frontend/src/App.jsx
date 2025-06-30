@@ -9,9 +9,11 @@ import ExportPage from './components/ExportPage';
 import ImageAnalysis from './components/ImageAnalysis';
 import { enrichPhone } from './services/api';
 
+ 
 function GraphPage({ result }) {
   if (!result) return null;
   return <GraphView graph={result.graph} />;
+ 
 }
 
 function App() {
@@ -48,7 +50,7 @@ function App() {
           <Navbar toggleTheme={toggleTheme} theme={theme} />
           <nav className="mb-4 flex gap-4">
             <Link to="/">{t('general')}</Link>
-            <Link to="/graph">Graph</Link>
+            <Link to="/graph">{t('graph')}</Link>
             <Link to="/image">{t('image_analysis')}</Link>
             {result && <Link to="/export">{t('export')}</Link>}
           </nav>
@@ -64,7 +66,13 @@ function App() {
                 />
               }
             />
-            <Route path="/graph" element={<GraphPage result={result} />} />
+            <Route
+              path="/graph"
+              element={
+                <GraphPage result={result} loading={loading} error={error} />
+              }
+            />
+ 
             <Route path="/image" element={<ImageAnalysis />} />
             <Route path="/export" element={<ExportPage phone={result?.phone_number} />} />
           </Routes>

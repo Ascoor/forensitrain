@@ -99,3 +99,41 @@ returns a list of optional packages and whether they loaded successfully.
 5. Check `logs/queries.log` for a new entry.
 6. Try an invalid number to verify an error message is shown.
 
+## Graph Visualization
+
+`/api/phone/enrich` also returns a `graph` field describing relationships
+between phones, emails and social accounts. You can visualize this using the
+`GraphView` component.
+
+```
+import GraphView from './components/GraphView'
+
+const sample = {
+  nodes: [
+    { id: '+12024561111', type: 'phone', label: 'Phone' },
+    { id: 'user@example.com', type: 'email', label: 'Email' }
+  ],
+  links: [{ source: '+12024561111', target: 'user@example.com' }]
+}
+
+<GraphView graph={sample} />
+```
+
+When integrating with the API, pass `result.graph` from `enrichPhone` directly
+into the component. It handles loading and error states automatically.
+
+## Image Analysis
+
+The `ImageAnalysis` component lets users upload an image (JPG/PNG) and submit it
+to `/api/analyze-image` for processing. A preview fades in after selection and a
+spinner is shown during the request.
+
+```jsx
+import ImageAnalysis from './components/ImageAnalysis'
+
+<ImageAnalysis />
+```
+
+Results include detected faces, extracted text and scene objects. Navigation in
+`App.jsx` already links to `/image` so the feature is available out of the box.
+
