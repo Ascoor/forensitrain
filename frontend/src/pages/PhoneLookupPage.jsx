@@ -13,7 +13,7 @@ const PhoneLookupPage = ({ onSearch, loading, error, result }) => {
   const { t } = useTranslation()
   const [tab, setTab] = useState('general')
  
-  const tabs = ['general', 'accounts', 'breaches', 'emails']
+  const tabs = ['general', 'accounts', 'breaches', 'emails', 'graph']
  
   return (
     <div>
