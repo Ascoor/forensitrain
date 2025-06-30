@@ -10,6 +10,7 @@ from .routers.phone import router as phone_router, limiter, rate_limit_handler
 from .routers.image import router as image_router
 from .routers.social import router as social_router
 from .routers.integration import router as integration_router
+from .routers.workflow import router as workflow_router
 
 
 load_dotenv()
@@ -92,3 +93,4 @@ app.include_router(phone_router, prefix="/api/phone")
 app.include_router(image_router, prefix="/api")
 app.include_router(social_router, prefix="/api/social")
 app.include_router(integration_router, prefix="/api")
+app.include_router(workflow_router, prefix="/api/workflow")
