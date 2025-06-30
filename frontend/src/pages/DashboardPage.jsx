@@ -11,6 +11,7 @@ import AlertCenter from '../components/dashboard/AlertCenter';
 import AnalogGauge from '../components/dashboard/AnalogGauge';
 import RadarScope from '../components/dashboard/RadarScope';
 import ToggleSwitch from '../components/dashboard/ToggleSwitch';
+import AvatarViewer from '../components/dashboard/AvatarViewer';
 import { motion } from 'framer-motion';
 
 const stats = [
@@ -61,6 +62,7 @@ const DashboardPage = () => {
         <MapWidget />
         <AlertCenter />
       </div>
+      <AvatarViewer />
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <DataStreamPanel />
         <SocialAccountsPanel />
