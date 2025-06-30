@@ -70,6 +70,49 @@ async def _a_query_sherlock(number: str) -> List[str]:
     return await asyncio.to_thread(_query_sherlock, number)
 
 
+def _query_truecaller(number: str) -> Optional[str]:
+    """Return the subscriber name from the Truecaller API if available."""
+    api_key = os.getenv("TRUECALLER_API_KEY")
+    if not api_key:
+        return None
+    url = f"https://api.truecaller.com/v1/search?q={number}&type=phone&token={api_key}"
+    try:
+        r = requests.get(url, timeout=10)
+        if r.status_code == 200:
+            data = r.json()
+            return data.get("name")
+    except Exception:
+        pass
+    return None
+
+
+def _query_numlookup(number: str) -> Dict[str, Optional[str]]:
+    """Return name and carrier info from NumLookup API if configured."""
+    api_key = os.getenv("NUMLOOKUP_API_KEY")
+    if not api_key:
+        return {}
+    url = f"https://api.numlookupapi.com/v1/validate/{number}?apikey={api_key}"
+    try:
+        r = requests.get(url, timeout=10)
+        if r.status_code == 200:
+            data = r.json()
+            return {
+                "name": data.get("carrier_name"),
+                "carrier": data.get("carrier"),
+            }
+    except Exception:
+        pass
+    return {}
+
+
+async def _a_query_truecaller(number: str) -> Optional[str]:
+    return await asyncio.to_thread(_query_truecaller, number)
+
+
+async def _a_query_numlookup(number: str) -> Dict[str, Optional[str]]:
+    return await asyncio.to_thread(_query_numlookup, number)
+
+
 def _scylla_email_lookup(number: str) -> List[str]:
     """Return emails from scylla.sh related to the phone number."""
     url = f"https://scylla.sh/search?q={number}&type=phone"
@@ -365,10 +408,16 @@ async def multi_source_lookup(phone_number: str) -> dict:
         "emails": asyncio.create_task(
             run_source("emails", _collect_emails(phone_number))
         ),
+        "truecaller": asyncio.create_task(
+            run_source("truecaller", _a_query_truecaller(phone_number))
+        ),
+        "numlookup": asyncio.create_task(
+            run_source("numlookup", _a_query_numlookup(phone_number))
+        ),
     }
 
     results = await asyncio.gather(*tasks.values())
-    profiles, breaches, email_data = results
+    profiles, breaches, email_data, tc_name, num_data = results
     valid_emails, email_breaches = email_data or ([], [])
 
     if profiles is not None:
@@ -392,6 +441,17 @@ async def multi_source_lookup(phone_number: str) -> dict:
     if email_breaches:
         result["email_breaches"] = email_breaches
         result["sources_used"].append("hibp_email")
+
+    if tc_name:
+        result["name"] = tc_name
+        result["sources_used"].append("truecaller")
+
+    if num_data:
+        if num_data.get("carrier"):
+            result["carrier"] = num_data["carrier"]
+        if num_data.get("name"):
+            result["name"] = num_data["name"]
+        result["sources_used"].append("numlookup")
 
     connections, graph = await _a_build_relationship_map(
         phone_number, result["accounts"], result["breaches"], result["emails"]
