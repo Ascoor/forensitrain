@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 from slowapi.errors import RateLimitExceeded
 import importlib
 
+from .core.logging_config import configure_logging
+
 
 from .routers.phone import router as phone_router, limiter, rate_limit_handler
 from .routers.image import router as image_router
@@ -12,9 +14,11 @@ from .routers.social import router as social_router
 from .routers.integration import router as integration_router
 from .routers.workflow import router as workflow_router
 from .routers.geosocial import router as geosocial_router
+from .routers.osint import router as osint_router
 
 
 load_dotenv()
+configure_logging()
 
 app = FastAPI(title="ForensiTrain API")
 
@@ -96,3 +100,4 @@ app.include_router(social_router, prefix="/api/social")
 app.include_router(integration_router, prefix="/api")
 app.include_router(workflow_router, prefix="/api/workflow")
 app.include_router(geosocial_router, prefix="/api/geosocial")
+app.include_router(osint_router, prefix="/api/osint")

@@ -80,6 +80,8 @@ at `/api` by default. You can override this by creating a `.env` file
 in `frontend/` containing `VITE_API_BASE=http://localhost:8000/api` for local development.
 
 All phone lookups are logged to `logs/queries.log`.
+You can set a custom log directory by defining the `LOG_DIR` environment
+variable before starting the app.
 
 ### Unified Startup Script
 
@@ -95,6 +97,12 @@ dependencies, and launches the API and React frontend concurrently.
 You can verify heavy dependencies by calling `/api/health`. The endpoint
 returns a list of optional packages and whether they loaded successfully.
 
+Additional OSINT helpers are exposed under `/api/osint`:
+
+- `/api/osint/smart-lookup` performs a recursive entity search.
+- `/api/osint/footprint` returns a lightweight footprint with discovered
+  accounts and emails.
+
 ### Manual Testing
 
 1. Run `./forensitrain_start.sh` and wait for both servers to start.
@@ -105,6 +113,15 @@ returns a list of optional packages and whether they loaded successfully.
    confidence score.
 5. Check `logs/queries.log` for a new entry.
 6. Try an invalid number to verify an error message is shown.
+
+### Running Tests
+
+Run the backend unit tests with `pytest`:
+
+```bash
+cd backend
+pytest app/tests
+```
 
 ## Graph Visualization
 

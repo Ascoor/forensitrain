@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '../components/dashboard/Sidebar';
 import ProfileMenu from '../components/dashboard/ProfileMenu';
 import StatsCard from '../components/dashboard/StatsCard';
@@ -14,14 +14,22 @@ import ToggleSwitch from '../components/dashboard/ToggleSwitch';
 import AvatarViewer from '../components/dashboard/AvatarViewer';
 import { motion } from 'framer-motion';
 
-const stats = [
-  { label: 'New Data', value: 1234, accent: 'blue' },
-  { label: 'Verified Contacts', value: 567, accent: 'green' },
-  { label: 'Active Alerts', value: 9, accent: 'orange' },
-];
-
 const DashboardPage = () => {
   const [systems, setSystems] = useState({ radar: true, gauges: true });
+  const [stats, setStats] = useState([]);
+
+  useEffect(() => {
+    fetch('/api/health')
+      .then((r) => r.json())
+      .then((d) => {
+        const deps = d.dependencies || {};
+        setStats([
+          { label: 'Deps OK', value: Object.keys(deps).length, accent: 'blue' },
+        ]);
+      })
+      .catch(() => setStats([]));
+  }, []);
+
   return (
     <div className="flex h-full bg-gray-900 text-gray-100 font-sans flicker">
       <Sidebar />
