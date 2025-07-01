@@ -8,6 +8,7 @@ from .osint_service import extract_osint_footprint
 from .recursive_osint_engine import smart_osint_lookup
 from .identity_enrichment_service import enrich_identity
 from .geosocial_service import extract_footprint
+from .phone_social_discovery import discover_social_accounts
 
 __all__ = [
     'analyze_phone',
@@ -18,4 +19,5 @@ __all__ = [
     'smart_osint_lookup',
     'enrich_identity',
     'extract_footprint',
+    'discover_social_accounts',
 ]
