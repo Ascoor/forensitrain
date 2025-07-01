@@ -17,6 +17,7 @@ potential social media profiles and known breach exposure.
 - Social account scraping with avatar extraction
 - Export reports as JSON or PDF
 - Image intelligence with face, text and object detection
+- Twitter geosocial footprint mapping via the GeoSocial Footprint CLI (optional)
 - Bilingual UI with dark mode
 - Unified enrichment endpoint returning a confidence score
 
@@ -59,7 +60,8 @@ actual user interface runs at `http://localhost:5173` when launched via
    ```bash
    pip install maigret
    ```
-6. (Optional) Install DetectDee, Ignorant and Sherlock to enable phone-to-social discovery:
+6. (Optional) Install the GeoSocial Footprint CLI to enable the geosocial mapping page.
+7. (Optional) Install DetectDee, Ignorant and Sherlock to enable phone-to-social discovery:
    ```bash
    pip install detectdee ignorant sherlock
    ```
