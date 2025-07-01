@@ -16,4 +16,5 @@ Pillow
 numpy
 opencv-python-headless
 email-validator
+geosocial-footprint
 
