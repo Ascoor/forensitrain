@@ -59,6 +59,10 @@ actual user interface runs at `http://localhost:5173` when launched via
    ```bash
    pip install maigret
    ```
+6. (Optional) Install DetectDee, Ignorant and Sherlock to enable phone-to-social discovery:
+   ```bash
+   pip install detectdee ignorant sherlock
+   ```
 
 ### Frontend
 
