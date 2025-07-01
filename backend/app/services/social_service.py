@@ -2,9 +2,11 @@ import json
 import os
 import subprocess
 from typing import List, Dict
+import logging
 
 LOG_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../logs"))
 os.makedirs(LOG_DIR, exist_ok=True)
+logger = logging.getLogger(__name__)
 
 
 def run_maigret(target: str) -> List[Dict]:
@@ -30,8 +32,10 @@ def run_maigret(target: str) -> List[Dict]:
                     }
                 )
             os.remove(out_file)
-    except Exception:
-        pass
+    except FileNotFoundError:
+        logger.error("Maigret CLI not found. Please install maigret")
+    except Exception as exc:  # noqa: BLE001
+        logger.error("Maigret error: %s", exc)
     return results
 
 
@@ -58,6 +62,8 @@ def run_sherlock(username: str) -> List[Dict]:
                     }
                 )
             os.remove(out_file)
-    except Exception:
-        pass
+    except FileNotFoundError:
+        logger.error("Sherlock CLI not found. Please install sherlock")
+    except Exception as exc:  # noqa: BLE001
+        logger.error("Sherlock error: %s", exc)
     return results

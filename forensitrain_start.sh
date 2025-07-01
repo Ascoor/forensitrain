@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# Quick launcher for development. Requires Python, Node.js and system
+# libraries for dlib. Install OS packages manually before running.
 
 set -e
 
@@ -30,9 +32,7 @@ source venv/bin/activate
 echo "📦 Upgrading pip..."
 pip install --upgrade pip
 
-echo "📦 Installing system dependencies for dlib..."
-sudo apt update
-sudo apt install -y build-essential cmake libopenblas-dev liblapack-dev libx11-dev libgtk-3-dev
+echo "📦 Ensure system packages for dlib are installed: build-essential cmake libopenblas-dev liblapack-dev libx11-dev libgtk-3-dev"
 
 if ! pip show dlib &>/dev/null; then
   echo "📦 Installing dlib (no GUI)..."

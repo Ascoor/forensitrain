@@ -11,11 +11,13 @@ from email_validator import validate_email, EmailNotValidError
 import requests
 
 import logging
+from logging.handlers import RotatingFileHandler
 
 from .phone_meta_service import parse_phone
 from .social_service import run_maigret, run_sherlock
 from .email_guess_service import guess_emails
 from .breach_service import scylla_lookup, dehashed_lookup
+from .osint_service import _breach_lookup
 from .relationship_service import build_relationship_map
 
 
@@ -23,22 +25,26 @@ from .relationship_service import build_relationship_map
 CACHE: Dict[str, dict] = {}
 
 # ensure logs directory exists
-LOG_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../logs"))
+LOG_DIR = os.getenv(
+    "LOG_DIR", os.path.abspath(os.path.join(os.path.dirname(__file__), "../../logs"))
+)
 os.makedirs(LOG_DIR, exist_ok=True)
 LOG_PATH = os.path.join(LOG_DIR, "queries.log")
 # relationships log
 REL_LOG_PATH = os.path.join(LOG_DIR, "relationships.log")
 
-# basic logging setup
-logging.basicConfig(
-    filename=LOG_PATH,
-    level=logging.INFO,
-    format="%(asctime)s\t%(levelname)s\t%(message)s",
-)
+# basic logging setup with rotation
+logger = logging.getLogger(__name__)
+handler = RotatingFileHandler(LOG_PATH, maxBytes=1_000_000, backupCount=3)
+formatter = logging.Formatter("%(asctime)s\t%(levelname)s\t%(message)s")
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
 
 # separate logger for relationship mapping
 rel_logger = logging.getLogger("relationships")
-rel_handler = logging.FileHandler(REL_LOG_PATH)
+rel_handler = RotatingFileHandler(REL_LOG_PATH, maxBytes=1_000_000, backupCount=3)
+rel_handler.setFormatter(formatter)
 rel_logger.addHandler(rel_handler)
 rel_logger.setLevel(logging.INFO)
 
@@ -255,14 +261,14 @@ async def _a_query_email_hibp(email: str) -> List[str]:
 
 def _log_query(phone: str, status: str, error: Optional[str] = None) -> None:
     if error:
-        logging.error("%s\t%s", phone, error)
+        logger.error("%s\t%s", phone, error)
     else:
-        logging.info("%s\t%s", phone, status)
+        logger.info("%s\t%s", phone, status)
 
 
 def _log_source_time(phone: str, source: str, duration: float) -> None:
     """Log time taken for a specific source lookup."""
-    logging.info("%s\t%s_time\t%.2f", phone, source, duration)
+    logger.info("%s\t%s_time\t%.2f", phone, source, duration)
 
 
 async def _a_build_relationship_map(
