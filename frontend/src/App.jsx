@@ -8,6 +8,7 @@ import GraphView from './components/GraphView';
 import ExportPage from './components/ExportPage';
 import ImageAnalysis from './components/ImageAnalysis';
 import DashboardPage from './pages/DashboardPage';
+import GeoSocialPage from './pages/GeoSocialPage';
 import { enrichPhone } from './services/api';
 
  
@@ -53,6 +54,7 @@ function App() {
             <Link to="/dashboard">Dashboard</Link>
             <Link to="/">{t('general')}</Link>
             <Link to="/graph">{t('graph')}</Link>
+            <Link to="/geosocial">{t('geosocial')}</Link>
             <Link to="/image">{t('image_analysis')}</Link>
             {result && <Link to="/export">{t('export')}</Link>}
           </nav>
@@ -74,6 +76,8 @@ function App() {
                 <GraphPage result={result} loading={loading} error={error} />
               }
             />
+
+            <Route path="/geosocial" element={<GeoSocialPage />} />
 
             <Route path="/dashboard" element={<DashboardPage />} />
 

@@ -11,6 +11,7 @@ from .routers.image import router as image_router
 from .routers.social import router as social_router
 from .routers.integration import router as integration_router
 from .routers.workflow import router as workflow_router
+from .routers.geosocial import router as geosocial_router
 
 
 load_dotenv()
@@ -94,3 +95,4 @@ app.include_router(image_router, prefix="/api")
 app.include_router(social_router, prefix="/api/social")
 app.include_router(integration_router, prefix="/api")
 app.include_router(workflow_router, prefix="/api/workflow")
+app.include_router(geosocial_router, prefix="/api/geosocial")

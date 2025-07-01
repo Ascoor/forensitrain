@@ -21,5 +21,6 @@
   "graph": "Graph",
   "invalid_image": "Unsupported image type. Upload JPG or PNG.",
   "file_too_large": "File too large (max 5MB)",
-  "avatar_viewer": "Avatar Viewer"
+  "avatar_viewer": "Avatar Viewer",
+  "geosocial": "GeoSocial"
 }
